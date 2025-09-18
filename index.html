@@ -285,8 +285,16 @@ document.addEventListener('DOMContentLoaded', () => {
         charts: {},
         carouselInterval: null,
         
+        // ==========================================================
+        // PERUBAHAN UTAMA ADA DI FUNGSI init() DAN startApp() DI BAWAH
+        // ==========================================================
+
         init() {
             this.initData();
+            // 1. Cache elemen DOM terlebih dahulu agar bisa diakses oleh semua fungsi
+            this.cacheDOMElements(); 
+
+            // 2. Baru cek status login
             const loggedInUser = this.getFromLocalStorage('currentUser', null);
             if (loggedInUser) {
                 this.state.currentUser = loggedInUser;
@@ -297,13 +305,17 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         startApp() {
-            document.querySelector('#login-screen').style.display = 'none';
-            document.querySelector('.app-container').style.display = 'flex';
+            // Sembunyikan login screen, tampilkan app container
+            this.elements.loginScreen.style.display = 'none';
+            this.elements.appContainer.style.display = 'flex';
             
+            // Lanjutkan proses setup
             this.injectBaseHTML();
-            this.cacheDOMElements();
             this.applySettings();
             this.attachEventListeners();
+
+            // Pindahkan cacheDOMElements() dari sini ke init()
+            // this.cacheDOMElements(); // <-- HAPUS DARI SINI
 
             if (!this.state.activeShift && this.state.currentUser.role === 'kasir') {
                 this.showStartShiftModal();
@@ -573,6 +585,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // === 2. AUTHENTICATION & SHIFT MANAGEMENT ===
         renderLoginScreen() {
+            // Karena cacheDOMElements sudah dipanggil, this.elements aman untuk digunakan
             this.elements.appContainer.style.display = 'none';
             const loginScreen = this.elements.loginScreen;
             loginScreen.style.display = 'flex';
@@ -792,6 +805,8 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         
         // === 5. FUNGSI RENDER HALAMAN (YANG DISEMPURNAKAN) ===
+        // ... (Sisa kode dari sini ke bawah tidak perlu diubah, jadi saya potong untuk keringkasan)
+        // ... PASTE SEMUA SISA KODE ANDA DARI renderBeranda() SAMPAI AKHIR DI SINI
         renderBeranda() {
             const today = new Date().toISOString().slice(0, 10);
             const todayTrx = this.state.transactions.filter(t => t.date.startsWith(today));
@@ -1474,7 +1489,7 @@ document.addEventListener('DOMContentLoaded', () => {
             this.showToast('Pengaturan berhasil disimpan!'); 
         },
         exportData() { const dataStr = JSON.stringify(this.state, null, 2); const blob = new Blob([dataStr], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `tokopintar_backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(url); this.showToast('Data berhasil diekspor.'); },
-        resetTransactions() { this.state.transactions = []; this.state.expenses = []; this.state.stockHistory = this.state.stockHistory.filter(h => h.reason === 'Stok Awal'); this.state.customers.forEach(c => { c.totalSpent = 0; c.visitCount = 0; }); this.saveAllData(); this.showToast('Data transaksi berhasil direset.', 'warning'); this.showPage(this.state.currentPage); },
+        resetTransactions() { this.showConfirmModal('Reset Data Transaksi?', 'Anda yakin ingin menghapus catatan biaya ini?', () => { this.state.transactions = []; this.state.expenses = []; this.state.stockHistory = this.state.stockHistory.filter(h => h.reason === 'Stok Awal'); this.state.customers.forEach(c => { c.totalSpent = 0; c.visitCount = 0; }); this.saveAllData(); this.showToast('Data transaksi berhasil direset.', 'warning'); this.showPage(this.state.currentPage); }); },
         
         showCustomerSelectionModal(){ const customersHTML = this.state.customers.map(c => `<div class="customer-list-item" data-id="${c.id}" data-name="${c.name}" style="padding: 10px; border-bottom: 1px solid var(--neutral-100); cursor:pointer;">${c.name} <small>${c.phone}</small></div>`).join(''); const content = `<input type="text" id="customer-select-search" class="form-input" placeholder="Cari pelanggan..." style="margin-bottom: 15px;"><div id="customer-list-container" style="max-height: 250px; overflow-y: auto;"><div class="customer-list-item" data-id="null" data-name="Pelanggan Umum" style="padding: 10px; border-bottom: 1px solid var(--neutral-100); cursor:pointer;"><strong>Pelanggan Umum</strong></div>${customersHTML}</div>`; this.showModal('Pilih Pelanggan', content, null); document.getElementById('modal-container').onclick = e => { const item = e.target.closest('.customer-list-item'); if(item) { this.state.activeTransaction.customerId = item.dataset.id === 'null' ? null : item.dataset.id; this.state.activeTransaction.customerName = item.dataset.name; this.closeModal(); if(this.state.currentPage === 'kasir' || document.getElementById('cart-container')) this.renderCart(); } }; document.getElementById('customer-select-search').addEventListener('input', e => { const term = e.target.value.toLowerCase(); document.querySelectorAll('.customer-list-item').forEach(item => { item.style.display = item.dataset.name.toLowerCase().includes(term) ? 'block' : 'none'; }); }); },
         
