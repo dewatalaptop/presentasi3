@@ -305,24 +305,22 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         startApp() {
-            // Sembunyikan login screen, tampilkan app container
-            this.elements.loginScreen.style.display = 'none';
-            this.elements.appContainer.style.display = 'flex';
-            
-            // Lanjutkan proses setup
-            this.injectBaseHTML();
-            this.applySettings();
-            this.attachEventListeners();
+    // Sembunyikan login screen, tampilkan app container
+    this.elements.loginScreen.style.display = 'none';
+    this.elements.appContainer.style.display = 'flex';
 
-            // Pindahkan cacheDOMElements() dari sini ke init()
-            // this.cacheDOMElements(); // <-- HAPUS DARI SINI
+    // Lanjutkan proses setup
+    this.injectBaseHTML();
+    this.applySettings();
+    // Baris attachEventListeners sudah dihapus dari sini
 
-            if (!this.state.activeShift && this.state.currentUser.role === 'kasir') {
-                this.showStartShiftModal();
-            }
+    if (!this.state.activeShift && this.state.currentUser.role === 'kasir') {
+        this.showStartShiftModal();
+    }
 
-            this.showPage(this.state.currentPage || 'beranda');
-        },
+    this.showPage(this.state.currentPage || 'beranda');
+},
+
 
         initData() {
             const defaultSettings = { 
