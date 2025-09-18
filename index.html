@@ -1035,7 +1035,41 @@ document.addEventListener('DOMContentLoaded', () => {
                    `</ul></div></div>`;
         },
         renderPengguna() {
-            // Placeholder for user management page
+                    renderPengguna() {
+            const users = this.state.staff;
+            const tableHTML = users.map(user => `
+                <tr>
+                    <td data-label="Nama">${user.name}</td>
+                    <td data-label="Username">${user.username}</td>
+                    <td data-label="Peran" style="text-transform: capitalize;">${user.role}</td>
+                    <td data-label="Aksi">
+                        <div class="actions">
+                            <button class="btn btn-text" data-action="editUser" data-id="${user.id}"><i class="fa-solid fa-pen-to-square"></i></button>
+                            ${ user.id !== 1 ? `<button class="btn btn-text" data-action="deleteUser" data-id="${user.id}"><i class="fa-solid fa-trash"></i></button>` : '' }
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            return `
+            <div class="page-container">
+                <header class="header">
+                    <h1>Manajemen Pengguna</h1>
+                    <button class="btn btn-primary" data-action="addUser"><i class="fa-solid fa-plus"></i> Tambah Pengguna</button>
+                </header>
+                <div class="card" style="padding:0;">
+                    <div class="table-wrapper">
+                        <table class="responsive-table">
+                            <thead>
+                                <tr><th>Nama</th><th>Username</th><th>Peran</th><th>Aksi</th></tr>
+                            </thead>
+                            <tbody>${tableHTML}</tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>`;
+        },
+
             return `<div class="page-container"><header class="header"><h1>Manajemen Pengguna</h1></header><div class="card"><p>Fitur manajemen pengguna akan ditambahkan di bagian selanjutnya.</p></div></div>`;
         },
         renderPengaturan() {
