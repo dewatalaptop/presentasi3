@@ -290,19 +290,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // ==========================================================
 
         init() {
-            this.initData();
-            // 1. Cache elemen DOM terlebih dahulu agar bisa diakses oleh semua fungsi
-            this.cacheDOMElements(); 
+    this.initData();
+    // 1. Cache elemen DOM terlebih dahulu agar bisa diakses oleh semua fungsi
+    this.cacheDOMElements(); 
 
-            // 2. Baru cek status login
-            const loggedInUser = this.getFromLocalStorage('currentUser', null);
-            if (loggedInUser) {
-                this.state.currentUser = loggedInUser;
-                this.startApp();
-            } else {
-                this.renderLoginScreen();
-            }
-        },
+    this.attachEventListeners(); // <--- TAMBAHKAN BARIS INI DI SINI
+
+    // 2. Baru cek status login
+    const loggedInUser = this.getFromLocalStorage('currentUser', null);
+    if (loggedInUser) {
+        this.state.currentUser = loggedInUser;
+        this.startApp();
+    } else {
+        this.renderLoginScreen();
+    }
+},
+
 
         startApp() {
     // Sembunyikan login screen, tampilkan app container
