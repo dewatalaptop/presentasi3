@@ -850,8 +850,39 @@ document.addEventListener('DOMContentLoaded', () => {
         saveCustomer(customerId) { const name = document.getElementById('c-name').value.trim(); const phone = document.getElementById('c-phone').value.trim(); if (!name || !phone) return false; if (customerId) { const index = this.state.customers.findIndex(c => c.id == customerId); this.state.customers[index] = { ...this.state.customers[index], name, phone }; } else { this.state.customers.push({ id: Date.now(), name, phone, totalSpent: 0, visitCount: 0 }); } this.saveToLocalStorage('customers', this.state.customers); this.renderCustomerTable(document.getElementById('customer-search')?.value || ''); this.showToast(`Pelanggan berhasil ${customerId ? 'diperbarui' : 'ditambahkan'}.`); return true; },
         deleteCustomer(customerId) { this.showConfirmModal('Hapus Pelanggan?', 'Anda yakin ingin menghapus pelanggan ini?', () => { this.state.customers = this.state.customers.filter(c => c.id != customerId); this.saveToLocalStorage('customers', this.state.customers); this.renderCustomerTable(document.getElementById('customer-search')?.value || ''); this.showToast('Pelanggan berhasil dihapus.'); }); },
                 // --- [DILENGKAPI] MANAJEMEN BIAYA ---
-        renderBiaya() { const today = new Date().toISOString().slice(0, 10); return `<div class="page-container"><header class="header"><h1>Biaya Operasional</h1><button class="btn btn-primary" data-action="addExpense"><i class="fa-solid fa-plus"></i> Tambah Biaya</button></header><div class="page-header" style="gap: 15px;"><div class="form-group" style="margin:0; flex:1;"><input type="date" id="expense-start" class="form-input" value="${today}"><label class="form-label has-value">Dari Tanggal</label></div><div class="form-group" style="margin:0; flex:1;"><input type="date" id="expense-end" class="form-input" value="${today}"><label class="form-label has-value">Sampai Tanggal</label></div></div><div class="card" style="padding:0;"><div class="table-wrapper" id="expense-table-container">${this.renderExpenseTable()}</div></div></div>`; },
-        renderExpenseTable() { const container = document.getElementById('expense-table-container'); const start = new Date(document.getElementById('expense-start').value); const end = new Date(document.getElementById('expense-end').value); end.setHours(23, 59, 59, 999); const filtered = this.state.expenses.filter(e => { const eDate = new Date(e.date); return eDate >= start && eDate <= end; }); let tableHTML = `<table class="responsive-table"><thead><tr><th>Tanggal</th><th>Deskripsi</th><th>Jumlah</th><th>Aksi</th></tr></thead><tbody>`; if(filtered.length > 0) { filtered.forEach(e => { tableHTML += `<tr><td data-label="Tanggal">${this.formatDate(e.date)}</td><td data-label="Deskripsi">${e.description}</td><td data-label="Jumlah">${this.formatRupiah(e.amount)}</td><td data-label="Aksi"><div class="actions"><button class="btn btn-text" data-action="editExpense" data-id="${e.id}"><i class="fa-solid fa-pen-to-square"></i></button><button class="btn btn-text" data-action="deleteExpense" data-id="${e.id}"><i class="fa-solid fa-trash"></i></button></div></td></tr>`; }); } else { tableHTML += `<tr><td colspan="4" style="text-align:center;">Tidak ada biaya pada rentang tanggal ini.</td></tr>`; } tableHTML += `</tbody></table>`; if(container) container.innerHTML = tableHTML; else return tableHTML; },
+                renderBiaya() { const today = new Date().toISOString().slice(0, 10); return `<div class="page-container"><header class="header"><h1>Biaya Operasional</h1><button class="btn btn-primary" data-action="addExpense"><i class="fa-solid fa-plus"></i> Tambah Biaya</button></header><div class="page-header" style="gap: 15px;"><div class="form-group" style="margin:0; flex:1;"><input type="date" id="expense-start" class="form-input" value="${today}"><label class="form-label has-value">Dari Tanggal</label></div><div class="form-group" style="margin:0; flex:1;"><input type="date" id="expense-end" class="form-input" value="${today}"><label class="form-label has-value">Sampai Tanggal</label></div></div><div class="card" style="padding:0;"><div class="table-wrapper" id="expense-table-container"></div></div></div>`; },
+
+                renderExpenseTable() {
+            const container = document.getElementById('expense-table-container');
+            if (!container) return '';
+
+            const startEl = document.getElementById('expense-start');
+            const endEl = document.getElementById('expense-end');
+
+            // Hanya filter jika elemen input tanggal ditemukan (artinya halaman sudah dimuat)
+            const filtered = (startEl && endEl)
+                ? this.state.expenses.filter(e => {
+                    const start = new Date(startEl.value);
+                    const end = new Date(endEl.value);
+                    start.setHours(0, 0, 0, 0);
+                    end.setHours(23, 59, 59, 999);
+                    const eDate = new Date(e.date);
+                    return eDate >= start && eDate <= end;
+                })
+                : this.state.expenses; // Jika tidak, tampilkan semua
+
+            let tableHTML = `<table class="responsive-table"><thead><tr><th>Tanggal</th><th>Deskripsi</th><th>Jumlah</th><th>Aksi</th></tr></thead><tbody>`;
+            if (filtered.length > 0) {
+                filtered.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(e => {
+                    tableHTML += `<tr><td data-label="Tanggal">${this.formatDate(e.date)}</td><td data-label="Deskripsi">${e.description}</td><td data-label="Jumlah">${this.formatRupiah(e.amount)}</td><td data-label="Aksi"><div class="actions"><button class="btn btn-text" data-action="editExpense" data-id="${e.id}"><i class="fa-solid fa-pen-to-square"></i></button><button class="btn btn-text" data-action="deleteExpense" data-id="${e.id}"><i class="fa-solid fa-trash"></i></button></div></td></tr>`;
+                });
+            } else {
+                tableHTML += `<tr><td colspan="4" style="text-align:center;">Tidak ada biaya ditemukan.</td></tr>`;
+            }
+            tableHTML += `</tbody></table>`;
+            container.innerHTML = tableHTML;
+        },
+
         showExpenseModal(expenseId) { const isEdit = expenseId !== undefined; const expense = isEdit ? this.state.expenses.find(e => e.id == expenseId) : {}; const content = `<div class="form-group"><input type="date" id="e-date" class="form-input" required value="${(expense.date || new Date().toISOString()).slice(0,10)}"><label class="form-label has-value">Tanggal</label></div><div class="form-group"><input type="text" id="e-desc" class="form-input" placeholder=" " required value="${expense.description || ''}"><label class="form-label">Deskripsi</label></div><div class="form-group"><input type="number" id="e-amount" class="form-input" placeholder=" " required min="0" value="${expense.amount || ''}"><label class="form-label">Jumlah</label></div>`; this.showModal(isEdit ? 'Edit Biaya' : 'Tambah Biaya', content, () => this.saveExpense(expenseId)); },
         saveExpense(expenseId) { const date = document.getElementById('e-date').value; const description = document.getElementById('e-desc').value.trim(); const amount = parseFloat(document.getElementById('e-amount').value); if (!date || !description || isNaN(amount)) return false; if (expenseId) { const index = this.state.expenses.findIndex(e => e.id == expenseId); this.state.expenses[index] = { ...this.state.expenses[index], date, description, amount }; } else { this.state.expenses.push({ id: Date.now(), date, description, amount }); } this.saveToLocalStorage('expenses', this.state.expenses); this.renderExpenseTable(); this.showToast(`Biaya berhasil ${expenseId ? 'diperbarui' : 'ditambahkan'}.`); return true; },
         deleteExpense(expenseId) { this.showConfirmModal('Hapus Biaya?', 'Anda yakin ingin menghapus biaya ini?', () => { this.state.expenses = this.state.expenses.filter(e => e.id != expenseId); this.saveToLocalStorage('expenses', this.state.expenses); this.renderExpenseTable(); this.showToast('Biaya berhasil dihapus.'); }); },
