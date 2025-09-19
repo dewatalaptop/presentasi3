@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <title>tokopintar.id - Professional POS</title>
 
@@ -142,11 +143,10 @@
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .cart-item-controls { display: flex; align-items: center; gap: 8px; }
         .cart-item-controls button { background: var(--neutral-200); border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-weight: bold; }
-        
         .cart-container .mobile-cart-close-btn { display: none; }
         @media (max-width: 1199.98px) {
             #cart-container {
-                display: none; /* Defaultnya tersembunyi */
+                display: none;
                 position: fixed;
                 bottom: 0; left: 0; right: 0;
                 height: 75vh;
@@ -158,23 +158,8 @@
                 transform: translateY(100%);
                 transition: transform 0.3s ease-out;
             }
-            #cart-container.is-visible {
-                display: flex;
-                transform: translateY(0);
-            }
-            .cart-container .mobile-cart-close-btn {
-                display: block;
-                position: absolute;
-                top: 15px;
-                right: 15px;
-                background: var(--neutral-100);
-                border: none;
-                width: 32px;
-                height: 32px;
-                border-radius: 50%;
-                font-size: 16px;
-                cursor: pointer;
-            }
+            #cart-container.is-visible { display: flex; transform: translateY(0); }
+            .cart-container .mobile-cart-close-btn { display: block; position: absolute; top: 15px; right: 15px; background: var(--neutral-100); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer; }
         }
         @media (min-width: 1200px) {
             .kasir-container { grid-template-columns: 2fr 1.2fr; height: calc(100vh - 40px); }
@@ -207,13 +192,10 @@
         .carousel-container { position: relative; overflow: hidden; border-radius: 16px; margin-bottom: 20px; background-color: var(--primary-500); }
         .carousel-track { display: flex; transition: transform 0.5s ease-in-out; }
         .carousel-slide { min-width: 100%; position: relative; }
-        .carousel-slide img { width: 100%; display: block; height: 250px; object-fit: cover; } /* --- [DIPERBAIKI] object-fit: cover untuk tampilan maksimal --- */
+        .carousel-slide img { width: 100%; display: block; height: 250px; object-fit: cover; }
         .carousel-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; }
         .carousel-dot { width: 8px; height: 8px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.5); cursor: pointer; transition: background-color 0.3s; }
         .carousel-dot.active { background-color: white; }
-        .image-preview-container { margin-bottom: 15px; }
-        .image-preview { max-width: 100px; max-height: 100px; border-radius: 8px; border: 1px solid var(--neutral-200); object-fit: cover; }
-        /* --- [GAYA BARU] Untuk manajemen banner di halaman Pengaturan --- */
         .banner-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; margin-top: 15px; }
         .banner-preview-item { position: relative; }
         .banner-preview-item img { width: 100%; height: 70px; object-fit: cover; border-radius: 8px; border: 1px solid var(--neutral-200); }
@@ -222,29 +204,21 @@
         .custom-file-upload { border: 1px solid var(--neutral-200); display: inline-block; padding: 10px 18px; cursor: pointer; border-radius: 8px; font-weight: 600; background-color: var(--neutral-0); color: var(--neutral-800); }
         .custom-file-upload:hover { background-color: var(--neutral-50); }
         input[type="file"] { display: none; }
-        /* ----------------------------------------------------------------- */
-        .table-map-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 20px; padding: 10px; }
-        .table-object { border: 2px solid var(--neutral-200); border-radius: 8px; padding: 15px; text-align: center; cursor: pointer; transition: all 0.2s ease; }
-        .table-object:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
-        .table-object.available { background-color: var(--neutral-0); }
-        .table-object.occupied { background-color: var(--warning-100); border-color: var(--warning-500); }
-        .table-object h4 { font-size: 18px; margin-bottom: 5px; }
-        .table-object span { font-size: 12px; color: var(--neutral-600); }
-        .table-object.occupied span { color: var(--warning-700); font-weight: 500; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .stat-card { background-color: var(--neutral-0); border: 1px solid var(--neutral-200); border-radius: 12px; padding: 15px; }
-        .stat-card h4 { font-size: 14px; font-weight: 500; color: var(--neutral-600); margin-bottom: 8px; }
-        .stat-card-value { display: flex; align-items: baseline; gap: 8px; }
-        .stat-card-value p { font-size: 20px; font-weight: 700; }
-        .chart-container { height: 350px; }
-        .dashboard-section-title { font-size: 14px; font-weight: 600; color: var(--neutral-600); margin: 25px 0 15px 0; text-transform: uppercase; }
-        .promo-badge { background-color: var(--info-100); color: var(--primary-600); font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-left: 8px; }
+        
         @media print {
             body * { visibility: hidden; }
             #receipt-print-area, #receipt-print-area * { visibility: visible; }
-            #receipt-print-area { position: absolute; left: 0; top: 0; width: 100%; }
+            #receipt-print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 58mm;
+                font-size: 8pt;
+                color: #000;
+                padding: 0;
+            }
             .modal-content { box-shadow: none; border: none; padding: 0; }
-            .btn, .modal-header .close-modal, #payment-success-actions { display: none; }
+            .btn, .modal-header .close-modal, #receipt-actions { display: none; }
         }
     </style>
 </head>
@@ -269,7 +243,7 @@
     <div id="toast-container"></div>
 
     <script>
-// --- APLIKASI POS PROFESIONAL V4.4 (RE-ARCHITECTED & ENHANCED) ---
+// --- APLIKASI POS PROFESIONAL V4.7 (FINAL & STABLE) ---
 document.addEventListener('DOMContentLoaded', () => {
     const App = {
         // === 1. STATE & INISIALISASI ===
@@ -299,7 +273,6 @@ document.addEventListener('DOMContentLoaded', () => {
         charts: {}, 
         carouselInterval: null,
         
-        // Arsitektur baru untuk rendering yang efisien
         isRenderScheduled: false,
         pendingRender: new Set(),
 
@@ -327,7 +300,6 @@ document.addEventListener('DOMContentLoaded', () => {
             this.showPage(this.state.currentPage || 'beranda');
         },
 
-        // --- [DIPERBAIKI] Inisialisasi data dengan penanganan error dan default yang lebih baik ---
         initData() {
             const defaultSettings = { 
                 namaToko: 'Kopi Pagi Ceria', 
@@ -336,10 +308,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 teleponToko: '081234567890', 
                 lowStockThreshold: 10,
                 posMode: 'retail', 
-                dashboardBanners: [] // <-- [PENAMBAHAN] Kunci untuk fitur banner baru
+                dashboardBanners: []
             };
             try {
-                // Memastikan staff default ada jika local storage kosong
                 const existingStaff = this.getFromLocalStorage('staff', []);
                 if (existingStaff.length === 0) { 
                     this.state.staff = [
@@ -351,13 +322,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.state.staff = existingStaff; 
                 }
 
-                // Memuat pengaturan dan memastikan `dashboardBanners` ada
                 this.state.settings = this.getFromLocalStorage('settings', defaultSettings);
                 if (!this.state.settings.dashboardBanners) { 
                     this.state.settings.dashboardBanners = []; 
                 }
                 
-                // Memuat data lainnya dari local storage dengan data contoh jika kosong
                 this.state.products = this.getFromLocalStorage('products', [ 
                     { id: 1, name: 'Kopi Susu Gula Aren', category: 'Kopi', price: 18000, cost: 10000, stock: 50, imageUrl: null }, 
                     { id: 2, name: 'Croissant Coklat', category: 'Roti', price: 22000, cost: 12000, stock: 8, imageUrl: null },
@@ -390,7 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const menuItems = [
                 { id: 'beranda', icon: 'fa-solid fa-store', label: 'Beranda', role: 'all' },
                 { id: 'kasir', icon: 'fa-solid fa-cash-register', label: 'Kasir', role: 'all' },
-                { id: 'riwayat', icon: 'fa-solid fa-receipt', label: 'Riwayat', role: 'all' }, // <-- [DIPERBAIKI] Riwayat ada di semua mode
+                { id: 'riwayat', icon: 'fa-solid fa-receipt', label: 'Riwayat', role: 'all' },
                 { id: 'produk', icon: 'fa-solid fa-box-open', label: 'Produk', role: 'admin' },
                 { id: 'analitik', icon: 'fa-solid fa-chart-line', label: 'Analitik', role: 'admin' },
                 { id: 'pelanggan', icon: 'fa-solid fa-users', label: 'Pelanggan', role: 'admin' },
@@ -515,9 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             switch(pageId) {
-                case 'beranda':
-                    this.initCarousel();
-                    break;
+                case 'beranda': this.initCarousel(); break;
                 case 'kasir':
                     const searchInput = document.getElementById('kasir-search-input');
                     if (searchInput) {
@@ -544,7 +511,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('expense-start')?.addEventListener('change', () => this.renderExpenseTable());
                     document.getElementById('expense-end')?.addEventListener('change', () => this.renderExpenseTable());
                     break;
-                case 'riwayat': // <-- [PENAMBAHAN] Event listener untuk halaman riwayat
+                case 'riwayat':
                     document.getElementById('history-search')?.addEventListener('input', e => this.renderTransactionHistory(e.target.value));
                     break;
                 case 'pengguna':
@@ -564,7 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'addProduct': this.showProductModal(); break;
                 case 'editProduct': this.showProductModal(value); break;
                 case 'deleteProduct': this.deleteProduct(value); break;
-                case 'adjustStock': this.adjustStock(id, parseInt(element.dataset.change)); break;
+                case 'adjustStock': this.adjustStock(id); break;
                 case 'addCustomer': this.showCustomerModal(); break;
                 case 'editCustomer': this.showCustomerModal(value); break;
                 case 'deleteCustomer': this.deleteCustomer(value); break;
@@ -582,17 +549,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'showMobileCart': this.toggleMobileCart(true); break;
                 case 'hideMobileCart': this.toggleMobileCart(false); break;
                 case 'viewTransaction': this.showTransactionDetailModal(value); break;
-                case 'printReceipt': window.print(); break;
+                case 'saveReceipt':
+                    const saveButton = element;
+                    saveButton.disabled = true;
+                    saveButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+                    this.showToast('Menyiapkan nota...', 'warning');
+                    const receiptEl = document.getElementById('receipt-print-area');
+                    const filename = document.getElementById('receipt-filename').value || 'struk.png';
+                    html2canvas(receiptEl, { scale: 3 }).then(canvas => {
+                        const link = document.createElement('a');
+                        link.href = canvas.toDataURL('image/png');
+                        link.download = filename;
+                        link.click();
+                        this.showToast('Nota berhasil diunduh.', 'success');
+                        saveButton.disabled = false;
+                        saveButton.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Nota';
+                    }).catch(err => {
+                        console.error('Gagal menyimpan nota:', err);
+                        this.showToast('Gagal menyimpan nota.', 'error');
+                        saveButton.disabled = false;
+                        saveButton.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Nota';
+                    });
+                    break;
+                case 'printThermalReceipt':
+                    window.print();
+                    break;
+                case 'printReceipt': 
+                    window.print(); 
+                    break;
                 case 'saveSettings': this.saveSettings(); break;
                 case 'exportData': this.exportData(); break;
                 case 'resetTransactions': this.showConfirmModal('Reset Data Transaksi?', 'Anda yakin ingin menghapus semua data transaksi?', () => this.resetTransactions()); break;
-                // --- [AKSI BARU] Aksi untuk menghapus banner ---
                 case 'removeBanner':
                     const index = parseInt(id);
                     if (!isNaN(index)) {
                         this.state.settings.dashboardBanners.splice(index, 1);
                         this.saveToLocalStorage('settings', this.state.settings);
-                        this.showPage('pengaturan'); // Render ulang halaman pengaturan
+                        this.showPage('pengaturan');
                         this.showToast('Banner berhasil dihapus.', 'success');
                     }
                     break;
@@ -600,7 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
 
-        // === 2. AUTHENTICATION & SHIFT MANAGEMENT (Tidak ada perubahan signifikan) ===
+        // === 2. AUTHENTICATION & SHIFT MANAGEMENT ===
         renderLoginScreen() { this.elements.appContainer.style.display = 'none'; const loginScreen = this.elements.loginScreen; loginScreen.style.display = 'flex'; loginScreen.innerHTML = `<div class="login-box"><i class="fa-solid fa-bolt" style="font-size: 40px; color: var(--primary-500); margin-bottom: 20px;"></i><h1>Selamat Datang</h1><p>Masukkan username dan PIN Anda untuk masuk.</p><form id="login-form"><div class="form-group"><input type="text" id="username" class="form-input" placeholder=" " required><label for="username" class="form-label">Username</label></div><div class="form-group"><input type="password" id="pin" class="form-input" placeholder=" " required inputmode="numeric" pattern="\\d*"><label for="pin" class="form-label">PIN</label></div><button type="submit" class="btn btn-primary" style="width: 100%;">Masuk</button></form></div>`; },
         handleLogin() { const username = document.getElementById('username').value; const pin = document.getElementById('pin').value; const user = this.state.staff.find(u => u.username === username && u.pin === pin); if (user) { this.state.currentUser = user; this.saveToLocalStorage('currentUser', user); this.showToast(`Selamat datang, ${user.name}!`, 'success'); this.startApp(); } else { this.showToast('Username atau PIN salah.', 'error'); } },
         logout() { if (this.state.activeShift) { this.showToast('Anda harus menutup shift terlebih dahulu.', 'error'); this.showEndShiftModal(); return; } this.state.currentUser = null; localStorage.removeItem('currentUser'); this.state.currentPage = 'beranda'; this.saveToLocalStorage('currentPage', 'beranda'); window.location.reload(); },
@@ -609,7 +602,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showEndShiftModal() { const shiftTransactions = this.state.transactions.filter(t => this.state.activeShift && t.shiftId === this.state.activeShift.id); const cashSales = shiftTransactions.filter(t => t.paymentMethod === 'Tunai').reduce((sum, t) => sum + t.finalTotal, 0); const expectedCash = this.state.activeShift.openingCash + cashSales; const content = `<div style="font-size: 14px; color: var(--neutral-600);"><div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Modal Awal:</span> <strong>${this.formatRupiah(this.state.activeShift.openingCash)}</strong></div><div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Total Penjualan Tunai:</span> <strong>${this.formatRupiah(cashSales)}</strong></div><hr style="margin: 10px 0;"><div style="display:flex; justify-content:space-between; margin-bottom:15px;"><span>Uang di Laci Seharusnya:</span> <strong style="color:var(--primary-500);">${this.formatRupiah(expectedCash)}</strong></div></div><p>Masukkan jumlah uang tunai aktual di laci.</p><div class="form-group" style="margin-top:20px;"><input type="number" id="closing-cash" class="form-input" placeholder=" " required min="0"><label class="form-label">Uang Tunai Aktual</label></div>`; this.showModal('Tutup Kasir', content, () => { const closingCash = parseFloat(document.getElementById('closing-cash').value); if (isNaN(closingCash) || closingCash < 0) { this.showToast('Masukkan jumlah yang valid.', 'error'); return false; } this.endShift(closingCash, cashSales, expectedCash); }, 'Selesaikan Shift', true); document.getElementById('modal-form').dataset.modalType = 'shift-modal'; },
         endShift(closingCash, cashSales, expectedCash) { let shift = { ...this.state.activeShift }; shift.endTime = new Date().toISOString(); shift.closingCash = closingCash; shift.cashSales = cashSales; shift.calculatedCash = expectedCash; shift.difference = closingCash - expectedCash; this.state.shifts.unshift(shift); this.state.activeShift = null; this.saveToLocalStorage('shifts', this.state.shifts); this.saveToLocalStorage('activeShift', this.state.activeShift); let message = 'Shift berhasil ditutup.'; if (shift.difference !== 0) { message += ` Ada selisih ${this.formatRupiah(shift.difference)}.`; } this.showToast(message, shift.difference === 0 ? 'success' : 'warning'); this.showPage('beranda'); },
 
-        // === 3. UTILITIES & MODALS (Tidak ada perubahan signifikan) ===
+        // === 3. UTILITIES & MODALS ===
         getFromLocalStorage(key, defaultValue) { const data = localStorage.getItem(key); if (!data) return defaultValue; try { return JSON.parse(data); } catch { return defaultValue; } },
         saveToLocalStorage: (key, data) => localStorage.setItem(key, JSON.stringify(data)),
         formatRupiah: (number) => `Rp ${new Intl.NumberFormat('id-ID').format(number)}`,
@@ -635,12 +628,11 @@ document.addEventListener('DOMContentLoaded', () => {
             this.state.currentPage = targetPage; 
             this.saveToLocalStorage('currentPage', targetPage); 
             
-            // --- [DIPERBAIKI] Menambahkan renderRiwayat ---
             const pageRenderers = { 
                 beranda: this.renderBeranda, 
                 kasir: this.renderKasir, 
                 produk: this.renderProduk, 
-                riwayat: this.renderRiwayat, // <-- Ditambahkan
+                riwayat: this.renderRiwayat,
                 analitik: this.renderAnalitik, 
                 lainnya: this.renderLainnya, 
                 pelanggan: this.renderPelanggan, 
@@ -669,7 +661,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const netProfitToday = revenueToday - cogsToday - expensesToday;
             const lowStockProducts = this.state.products.filter(p => p.stock > 0 && p.stock <= this.state.settings.lowStockThreshold);
             
-            // --- [DIPERBARUI] Logika untuk menampilkan banner atau pesan selamat datang ---
             const banners = this.state.settings.dashboardBanners || [];
             let heroHTML = banners.length > 0 
                 ? `<div id="dashboard-carousel" class="carousel-container">
@@ -696,156 +687,34 @@ document.addEventListener('DOMContentLoaded', () => {
             return `<div class="kasir-container page-container"><div class="card product-section" style="padding: 15px; display:flex; flex-direction:column; margin-bottom:0;"><div style="margin-bottom:15px;"><input type="text" id="kasir-search-input" class="form-input" placeholder="Cari produk (F1)..."></div><div id="product-grid" class="product-grid" style="flex-grow:1;"></div></div><div id="cart-container" class="card cart-container" style="margin-bottom:0;"><button class="mobile-cart-close-btn" data-action="hideMobileCart">&times;</button><h3 style="margin-bottom:15px;">Keranjang</h3><div id="cart-items" style="flex-grow:1; overflow-y:auto; padding-right:10px;"></div><div id="cart-total" style="margin-top:auto; padding-top:15px; border-top:1px solid var(--neutral-200);"></div><div id="cart-actions" style="display:flex; flex-direction:column; gap:10px; margin-top:15px;"><button class="btn btn-primary" style="flex:1;" data-action="openPaymentModal" disabled>Bayar (F9)</button></div></div></div><div id="cart-summary-bar" data-action="showMobileCart"></div>`;
         },
         renderProductGrid(searchTerm = '') { const grid = document.getElementById('product-grid'); if(!grid) return; const term = searchTerm.toLowerCase(); const filteredProducts = this.state.products.filter(p => p.name.toLowerCase().includes(term)); grid.innerHTML = filteredProducts.length ? filteredProducts.map(p => { const imageHTML = p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}">` : `<div class="product-card-placeholder">${p.name.charAt(0)}</div>`; return `<div class="product-card ${p.stock <= 0 ? 'out-of-stock' : ''}" data-id="${p.id}"><div class="product-card-stock">Stok: ${p.stock}</div>${imageHTML}<div class="product-card-info"><h4>${p.name}</h4><p>${this.formatRupiah(p.price)}</p></div></div>` }).join('') : `<p style="color: var(--neutral-400); text-align:center; width:100%;">Produk tidak ditemukan.</p>`; },
-        
-        // --- [FUNGSI BARU & AKTIF] Render halaman riwayat transaksi ---
         renderRiwayat() {
-            return `<div class="page-container">
-                        <header class="header"><h1>Riwayat Transaksi</h1></header>
-                        <div class="page-header">
-                            <input type="text" id="history-search" class="form-input" placeholder="Cari ID transaksi, nama pelanggan..." style="max-width:400px;">
-                        </div>
-                        <div class="card" style="padding:0;">
-                            <div class="table-wrapper" id="history-table-container">
-                                ${this.renderTransactionHistory()}
-                            </div>
-                        </div>
-                    </div>`;
+            return `<div class="page-container"><header class="header"><h1>Riwayat Transaksi</h1></header><div class="page-header"><input type="text" id="history-search" class="form-input" placeholder="Cari ID transaksi, nama pelanggan..." style="max-width:400px;"></div><div class="card" style="padding:0;"><div class="table-wrapper" id="history-table-container">${this.renderTransactionHistory()}</div></div></div>`;
         },
         renderTransactionHistory(filter = '') {
             const container = document.getElementById('history-table-container');
             const searchTerm = filter.toLowerCase();
-            const filtered = this.state.transactions.filter(t => 
-                t.id.toLowerCase().includes(searchTerm) || 
-                t.customerName.toLowerCase().includes(searchTerm)
-            );
-
-            let tableHTML = `<table class="responsive-table">
-                                <thead>
-                                    <tr>
-                                        <th>ID Transaksi</th>
-                                        <th>Tanggal</th>
-                                        <th>Pelanggan</th>
-                                        <th>Total</th>
-                                        <th>Kasir</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>`;
+            const filtered = this.state.transactions.filter(t => t.id.toLowerCase().includes(searchTerm) || t.customerName.toLowerCase().includes(searchTerm));
+            let tableHTML = `<table class="responsive-table"><thead><tr><th>ID Transaksi</th><th>Tanggal</th><th>Pelanggan</th><th>Total</th><th>Kasir</th><th>Aksi</th></tr></thead><tbody>`;
             if (filtered.length > 0) {
                 filtered.forEach(t => {
-                    tableHTML += `<tr>
-                                    <td data-label="ID Transaksi">${t.id}</td>
-                                    <td data-label="Tanggal">${this.formatDate(t.date, true)}</td>
-                                    <td data-label="Pelanggan">${t.customerName}</td>
-                                    <td data-label="Total">${this.formatRupiah(t.finalTotal)}</td>
-                                    <td data-label="Kasir">${t.userName}</td>
-                                    <td data-label="Aksi">
-                                        <div class="actions">
-                                            <button class="btn btn-text" data-action="viewTransaction" data-id="${t.id}">
-                                                <i class="fa-solid fa-eye"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                  </tr>`;
+                    tableHTML += `<tr><td data-label="ID Transaksi">${t.id}</td><td data-label="Tanggal">${this.formatDate(t.date, true)}</td><td data-label="Pelanggan">${t.customerName}</td><td data-label="Total">${this.formatRupiah(t.finalTotal)}</td><td data-label="Kasir">${t.userName}</td><td data-label="Aksi"><div class="actions"><button class="btn btn-text" data-action="viewTransaction" data-id="${t.id}"><i class="fa-solid fa-eye"></i></button></div></td></tr>`;
                 });
-            } else {
-                tableHTML += `<tr><td colspan="6" style="text-align:center;">Transaksi tidak ditemukan.</td></tr>`;
-            }
+            } else { tableHTML += `<tr><td colspan="6" style="text-align:center;">Transaksi tidak ditemukan.</td></tr>`; }
             tableHTML += `</tbody></table>`;
-            
-            if (container) {
-                container.innerHTML = tableHTML;
-            } else {
-                return tableHTML;
-            }
+            if (container) { container.innerHTML = tableHTML; } else { return tableHTML; }
         },
-
-        // --- [DIPERBARUI] Render halaman pengaturan dengan manajemen banner ---
         renderPengaturan() {
             const banners = this.state.settings.dashboardBanners || [];
-            const bannerPreviewHTML = banners.map((src, index) => `
-                <div class="banner-preview-item">
-                    <img src="${src}" alt="Banner ${index + 1}">
-                    <button class="banner-remove-btn" data-action="removeBanner" data-id="${index}">&times;</button>
-                </div>
-            `).join('');
-
-            return `<div class="page-container">
-                        <header class="header"><h1>Pengaturan</h1></header>
-                        <div class="card">
-                            <h2>Pengaturan Toko</h2>
-                            <form id="settings-form" novalidate>
-                                <div class="form-group"><input type="text" id="s-namaToko" class="form-input" placeholder=" " required value="${this.state.settings.namaToko}"><label class="form-label">Nama Toko</label></div>
-                                <div class="form-group"><input type="text" id="s-alamatToko" class="form-input" placeholder=" " required value="${this.state.settings.alamatToko}"><label class="form-label">Alamat Toko</label></div>
-                                <div class="form-group"><input type="tel" id="s-teleponToko" class="form-input" placeholder=" " required value="${this.state.settings.teleponToko}"><label class="form-label">No. Telepon</label></div>
-                                <div class="form-group"><textarea id="s-pesanDiStruk" class="form-input" placeholder=" " required>${this.state.settings.pesanDiStruk}</textarea><label class="form-label">Pesan di Struk</label></div>
-                                <div class="form-group"><input type="number" id="s-lowStock" class="form-input" placeholder=" " required value="${this.state.settings.lowStockThreshold}"><label class="form-label">Ambang Batas Stok Rendah</label></div>
-                                <button type="button" class="btn btn-primary" data-action="saveSettings">Simpan Pengaturan</button>
-                            </form>
-                        </div>
-                        <div class="card">
-                            <h2>Manajemen Banner Beranda</h2>
-                            <p style="color: var(--neutral-600); margin-bottom: 20px;">Unggah hingga 5 gambar untuk ditampilkan di beranda.</p>
-                            
-                            <div id="banner-preview-grid" class="banner-preview-grid">${bannerPreviewHTML}</div>
-                            
-                            ${banners.length < 5 ? `
-                            <div style="margin-top: 20px;">
-                                <label for="banner-uploader" class="btn btn-secondary">
-                                    <i class="fa-solid fa-upload"></i> Unggah Gambar
-                                </label>
-                                <input type="file" id="banner-uploader" data-uploader="dashboardBanners" accept="image/*" multiple>
-                            </div>
-                            ` : `
-                            <p style="color: var(--warning-700); margin-top: 20px; font-weight: 500;">Slot banner sudah penuh (Maksimal 5).</p>
-                            `}
-                        </div>
-                    </div>`;
+            const bannerPreviewHTML = banners.map((src, index) => `<div class="banner-preview-item"><img src="${src}" alt="Banner ${index + 1}"><button class="banner-remove-btn" data-action="removeBanner" data-id="${index}">&times;</button></div>`).join('');
+            return `<div class="page-container"><header class="header"><h1>Pengaturan</h1></header><div class="card"><h2>Pengaturan Toko</h2><form id="settings-form" novalidate><div class="form-group"><input type="text" id="s-namaToko" class="form-input" placeholder=" " required value="${this.state.settings.namaToko}"><label class="form-label">Nama Toko</label></div><div class="form-group"><input type="text" id="s-alamatToko" class="form-input" placeholder=" " required value="${this.state.settings.alamatToko}"><label class="form-label">Alamat Toko</label></div><div class="form-group"><input type="tel" id="s-teleponToko" class="form-input" placeholder=" " required value="${this.state.settings.teleponToko}"><label class="form-label">No. Telepon</label></div><div class="form-group"><textarea id="s-pesanDiStruk" class="form-input" placeholder=" " required>${this.state.settings.pesanDiStruk}</textarea><label class="form-label">Pesan di Struk</label></div><div class="form-group"><input type="number" id="s-lowStock" class="form-input" placeholder=" " required value="${this.state.settings.lowStockThreshold}"><label class="form-label">Ambang Batas Stok Rendah</label></div><button type="button" class="btn btn-primary" data-action="saveSettings">Simpan Pengaturan</button></form></div><div class="card"><h2>Manajemen Banner Beranda</h2><p style="color: var(--neutral-600); margin-bottom: 20px;">Unggah hingga 5 gambar untuk ditampilkan di beranda.</p><div id="banner-preview-grid" class="banner-preview-grid">${bannerPreviewHTML}</div>${banners.length < 5 ? `<div style="margin-top: 20px;"><label for="banner-uploader" class="btn btn-secondary"><i class="fa-solid fa-upload"></i> Unggah Gambar</label><input type="file" id="banner-uploader" data-uploader="dashboardBanners" accept="image/*" multiple></div>` : `<p style="color: var(--warning-700); margin-top: 20px; font-weight: 500;">Slot banner sudah penuh (Maksimal 5).</p>`}</div></div>`;
         },
-        // --- [FUNGSI BARU & AKTIF] Untuk menampilkan menu di halaman "Lainnya" ---
         renderLainnya() {
-            // Daftar menu yang hanya bisa diakses oleh admin
-            const adminMenus = [
-                { id: 'produk', icon: 'fa-solid fa-box-open', label: 'Produk'},
-                { id: 'analitik', icon: 'fa-solid fa-chart-line', label: 'Analitik'},
-                { id: 'pelanggan', icon: 'fa-solid fa-users', label: 'Pelanggan'},
-                { id: 'biaya', icon: 'fa-solid fa-wallet', label: 'Biaya'},
-                { id: 'pengguna', icon: 'fa-solid fa-user-shield', label: 'Pengguna'},
-                { id: 'pengaturan', icon: 'fa-solid fa-gear', label: 'Pengaturan'}
-            ];
-
-            // Cek apakah pengguna saat ini adalah admin
-            // Jika ya, buat daftar menu admin. Jika tidak, buat daftar kosong.
-            const menuItemsHTML = (this.state.currentUser.role === 'admin' ? adminMenus : [])
-                .map(item => `
-                    <li class="lainnya-menu-item">
-                        <a href="#" class="nav-link" data-page="${item.id}">
-                            <i class="${item.icon}"></i>${item.label}
-                        </a>
-                    </li>
-                `).join('');
-
-            // Kembalikan struktur HTML untuk halaman "Lainnya"
-            // Menu "Keluar" akan selalu tampil untuk semua role
-            return `<div class="page-container">
-                        <header class="header">
-                            <h1>Lainnya</h1>
-                        </header>
-                        <ul class="lainnya-menu">
-                            ${menuItemsHTML}
-                            <li class="lainnya-menu-item">
-                                <a href="#" data-action="logout">
-                                    <i class="fa-solid fa-right-from-bracket"></i>Keluar
-                                </a>
-                            </li>
-                        </ul>
-                    </div>`; 
+            const adminMenus = [ { id: 'produk', icon: 'fa-solid fa-box-open', label: 'Produk'}, { id: 'analitik', icon: 'fa-solid fa-chart-line', label: 'Analitik'}, { id: 'pelanggan', icon: 'fa-solid fa-users', label: 'Pelanggan'}, { id: 'biaya', icon: 'fa-solid fa-wallet', label: 'Biaya'}, { id: 'pengguna', icon: 'fa-solid fa-user-shield', label: 'Pengguna'}, { id: 'pengaturan', icon: 'fa-solid fa-gear', label: 'Pengaturan'} ];
+            const menuItemsHTML = (this.state.currentUser.role === 'admin' ? adminMenus : []).map(item => `<li class="lainnya-menu-item"><a href="#" class="nav-link" data-page="${item.id}"><i class="${item.icon}"></i>${item.label}</a></li>`).join('');
+            return `<div class="page-container"><header class="header"><h1>Lainnya</h1></header><ul class="lainnya-menu">${menuItemsHTML}<li class="lainnya-menu-item"><a href="#" data-action="logout"><i class="fa-solid fa-right-from-bracket"></i>Keluar</a></li></ul></div>`; 
         },
 
-        // === SISA FUNGSI (KERANJANG, PRODUK, DLL.) ===
-        // (Salin semua sisa fungsi dari kode asli Anda ke sini, mulai dari `getCurrentCartItems` hingga akhir)
-        // ... (Fungsi-fungsi ini tidak perlu diubah secara signifikan dan dapat disalin langsung)
-        // Contoh:
+        // === 6. LOGIKA KERANJANG & PEMBAYARAN ===
         getCurrentCartItems() { return this.state.cart; },
         saveCurrentCart(items) { this.state.cart = items; this.saveToLocalStorage('cart', this.state.cart); },
         addToCart(productId) {
@@ -880,27 +749,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!cartItemsContainer) return;
             const items = this.getCurrentCartItems();
             const { subtotal, totalDiscount, finalTotal } = this.calculateCartTotals(items);
-
-            cartItemsContainer.innerHTML = items.length > 0 ? items.map(item => `
-                <div id="cart-item-${item.id}" style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid var(--neutral-100);">
-                    <div>
-                        <strong style="display:block; margin-bottom: 4px; font-size: 14px;">${item.name}</strong>
-                        <div class="cart-item-controls">
-                            <button data-action="updateCartQty" data-id="${item.id}" data-change="-1">-</button>
-                            <span class="cart-item-qty">${item.quantity}</span>
-                            <button data-action="updateCartQty" data-id="${item.id}" data-change="1">+</button>
-                            <button data-action="removeFromCart" data-id="${item.id}" style="margin-left:10px; color: var(--danger-500); background: transparent;"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>
-                    <div style="text-align:right;">
-                        <strong class="cart-item-total" style="font-weight: 500;">${this.formatRupiah(item.price * item.quantity)}</strong>
-                    </div>
-                </div>
-            `).join('') : `<p class="empty-cart-msg" style="color: var(--neutral-400); text-align:center; padding: 20px 0;">Keranjang kosong</p>`;
-
+            cartItemsContainer.innerHTML = items.length > 0 ? items.map(item => `<div id="cart-item-${item.id}" style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid var(--neutral-100);"><div><strong style="display:block; margin-bottom: 4px; font-size: 14px;">${item.name}</strong><div class="cart-item-controls"><button data-action="updateCartQty" data-id="${item.id}" data-change="-1">-</button><span class="cart-item-qty">${item.quantity}</span><button data-action="updateCartQty" data-id="${item.id}" data-change="1">+</button><button data-action="removeFromCart" data-id="${item.id}" style="margin-left:10px; color: var(--danger-500); background: transparent;"><i class="fa-solid fa-trash"></i></button></div></div><div style="text-align:right;"><strong class="cart-item-total" style="font-weight: 500;">${this.formatRupiah(item.price * item.quantity)}</strong></div></div>`).join('') : `<p class="empty-cart-msg" style="color: var(--neutral-400); text-align:center; padding: 20px 0;">Keranjang kosong</p>`;
             const totalEl = document.getElementById('cart-total');
             if (totalEl) { totalEl.innerHTML = `<div style="display:flex; justify-content:space-between; margin-bottom: 5px;"><span>Subtotal:</span><span>${this.formatRupiah(subtotal)}</span></div>${totalDiscount > 0 ? `<div style="display:flex; justify-content:space-between; margin-bottom: 10px; color:var(--success-700);"><span>Diskon:</span><span>-${this.formatRupiah(totalDiscount)}</span></div>` : ''}<div style="display:flex; justify-content:space-between; align-items:center; font-size: 1.2em;"><strong>Total:</strong> <strong>${this.formatRupiah(finalTotal)}</strong></div>`; }
-
             const isDisabled = items.length === 0;
             document.querySelector('[data-action="openPaymentModal"]')?.toggleAttribute('disabled', isDisabled);
             const summaryBar = document.getElementById('cart-summary-bar');
@@ -913,102 +764,176 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         calculateCartTotals(items) { const subtotal = items.reduce((sum, item) => sum + (item.originalPrice || item.price) * item.quantity, 0); const finalTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0); const totalDiscount = subtotal - finalTotal; return { subtotal, totalDiscount, finalTotal }; },
         openPaymentModal(itemsToPay) { const items = itemsToPay || this.getCurrentCartItems(); if (items.length === 0) return; const { finalTotal } = this.calculateCartTotals(items); const content = `<div style="text-align:center; margin-bottom:20px;"><span style="font-size: 14px; color: var(--neutral-600);">Total Tagihan</span><h3 style="font-size: 32px; color: var(--primary-500);">${this.formatRupiah(finalTotal)}</h3></div><div class="form-group"><select id="p-method" class="form-input"><option value="Tunai">Tunai</option><option value="QRIS">QRIS</option><option value="Kartu">Kartu Debit/Kredit</option></select><label class="form-label">Metode Pembayaran</label></div><div id="cash-payment-fields"><div class="form-group"><input type="number" id="p-paid" class="form-input" placeholder=" " required min="${finalTotal}"><label class="form-label">Jumlah Dibayar</label></div><div style="text-align:center; margin-top: -15px;"><span style="font-size: 14px; color: var(--neutral-600);">Kembalian</span><h3 id="payment-change" style="font-size: 24px;">${this.formatRupiah(0)}</h3></div></div><hr style="margin: 20px 0;"><div style="display:flex; justify-content:space-between; align-items:center;"><span>Pelanggan: <strong>${this.state.activeTransaction.customerName}</strong></span><button type="button" class="btn btn-secondary" data-action="showCustomerSelection">Ganti</button></div>`; this.showModal('Pembayaran', content, () => this.processPayment(items), 'Proses Pembayaran'); const paidInput = document.getElementById('p-paid'); const changeEl = document.getElementById('payment-change'); const methodSelect = document.getElementById('p-method'); const cashFields = document.getElementById('cash-payment-fields'); paidInput.addEventListener('input', () => { const paidAmount = parseFloat(paidInput.value) || 0; const change = paidAmount - finalTotal; changeEl.textContent = this.formatRupiah(change >= 0 ? change : 0); }); methodSelect.addEventListener('change', () => { if (methodSelect.value !== 'Tunai') { cashFields.style.display = 'none'; paidInput.value = finalTotal; paidInput.required = false; changeEl.textContent = this.formatRupiah(0); } else { cashFields.style.display = 'block'; paidInput.value = ''; paidInput.required = true; } }); },
-        processPayment(paidItems) { const { finalTotal, subtotal, totalDiscount } = this.calculateCartTotals(paidItems); const method = document.getElementById('p-method').value; let paidAmount = finalTotal; let changeAmount = 0; if (method === 'Tunai') { const paidInput = document.getElementById('p-paid'); if (!paidInput || !paidInput.value) { this.showToast('Masukkan jumlah uang dibayar!', 'error'); return false; } paidAmount = parseFloat(paidInput.value); if(isNaN(paidAmount) || paidAmount < finalTotal) { this.showToast('Jumlah bayar tidak cukup!', 'error'); return false; } changeAmount = paidAmount - finalTotal; } const trxId = 'TRX-' + Date.now(); paidItems.forEach(item => { const product = this.state.products.find(p => p.id === item.id); if(product) { const oldStock = product.stock; product.stock -= item.quantity; this.addStockLog(product.id, -item.quantity, oldStock, product.stock, `Penjualan #${trxId}`); } }); const newTransaction = { id: trxId, date: new Date().toISOString(), items: paidItems, subtotal, totalDiscount, finalTotal, paymentMethod: method, paidAmount, changeAmount, customerId: this.state.activeTransaction.customerId, customerName: this.state.activeTransaction.customerName, userId: this.state.currentUser.id, userName: this.state.currentUser.name, shiftId: this.state.activeShift ? this.state.activeShift.id : null, }; this.state.transactions.unshift(newTransaction); if(this.state.activeTransaction.customerId) { const customer = this.state.customers.find(c => c.id == this.state.activeTransaction.customerId); if(customer){ customer.totalSpent = (customer.totalSpent || 0) + finalTotal; customer.visitCount = (customer.visitCount || 0) + 1; } } this.state.cart = []; this.state.activeTransaction = { orderId: null, customerId: null, customerName: 'Pelanggan Umum' }; this.saveToLocalStorage('transactions', this.state.transactions); this.saveToLocalStorage('products', this.state.products); this.saveToLocalStorage('stockHistory', this.state.stockHistory); this.saveToLocalStorage('customers', this.state.customers); this.saveToLocalStorage('cart', this.state.cart); this.showPaymentSuccessModal(trxId); this.toggleMobileCart(false); this.scheduleRender('renderCart'); return true; },
-        showPaymentSuccessModal(transactionId) { const trx = this.state.transactions.find(t => t.id === transactionId); if (!trx) return; const receiptHTML = this.generateReceiptHTML(trx); const content = `<div style="text-align: center; margin-bottom: 20px;"><i class="fa-solid fa-circle-check" style="color: var(--success-500); font-size: 48px;"></i><h3 style="margin-top: 15px;">Transaksi Berhasil!</h3></div><div style="border: 1px solid var(--neutral-200); border-radius: 8px; max-height: 300px; overflow-y: auto;">${receiptHTML}</div>`; this.showModal('Pembayaran Selesai', content, null, '', false); const modalFooter = document.querySelector('.modal-content div[style*="text-align:right"]'); if (modalFooter) { modalFooter.id = "payment-success-actions"; modalFooter.innerHTML = `<button class="btn btn-secondary" data-action="printReceipt"><i class="fa-solid fa-print"></i> Cetak Struk</button><button class="btn btn-primary" data-action="finishTransaction">Selesai (Transaksi Baru)</button>`; } },
+        processPayment(paidItems) {
+            const { finalTotal, subtotal, totalDiscount } = this.calculateCartTotals(paidItems);
+            const method = document.getElementById('p-method').value;
+            let paidAmount = finalTotal;
+            let changeAmount = 0;
+            if (method === 'Tunai') {
+                const paidInput = document.getElementById('p-paid');
+                if (!paidInput || !paidInput.value) { this.showToast('Masukkan jumlah uang dibayar!', 'error'); return false; }
+                paidAmount = parseFloat(paidInput.value);
+                if (isNaN(paidAmount) || paidAmount < finalTotal) { this.showToast('Jumlah bayar tidak cukup!', 'error'); return false; }
+                changeAmount = paidAmount - finalTotal;
+            }
+            const trxId = 'TRX-' + Date.now();
+            paidItems.forEach(item => {
+                const product = this.state.products.find(p => p.id === item.id);
+                if (product) {
+                    const oldStock = product.stock;
+                    product.stock -= item.quantity;
+                    this.addStockLog(product.id, -item.quantity, oldStock, product.stock, `Penjualan #${trxId}`);
+                }
+            });
+            const newTransaction = { id: trxId, date: new Date().toISOString(), items: paidItems, subtotal, totalDiscount, finalTotal, paymentMethod: method, paidAmount, changeAmount, customerId: this.state.activeTransaction.customerId, customerName: this.state.activeTransaction.customerName, userId: this.state.currentUser.id, userName: this.state.currentUser.name, shiftId: this.state.activeShift ? this.state.activeShift.id : null, };
+            this.state.transactions.unshift(newTransaction);
+            if (this.state.activeTransaction.customerId) {
+                const customer = this.state.customers.find(c => c.id == this.state.activeTransaction.customerId);
+                if (customer) { customer.totalSpent = (customer.totalSpent || 0) + finalTotal; customer.visitCount = (customer.visitCount || 0) + 1; }
+            }
+            this.state.cart = [];
+            this.state.activeTransaction = { orderId: null, customerId: null, customerName: 'Pelanggan Umum' };
+            this.saveToLocalStorage('transactions', this.state.transactions);
+            this.saveToLocalStorage('products', this.state.products);
+            this.saveToLocalStorage('stockHistory', this.state.stockHistory);
+            this.saveToLocalStorage('customers', this.state.customers);
+            this.saveToLocalStorage('cart', this.state.cart);
+            this.closeModal();
+            setTimeout(() => this.showReceiptOptionsModal(trxId), 100); 
+            this.toggleMobileCart(false);
+            this.scheduleRender('renderCart');
+            return true;
+        },
+        showReceiptOptionsModal(transactionId) {
+            const trx = this.state.transactions.find(t => t.id === transactionId);
+            if (!trx) return;
+            const receiptHTML = this.generateReceiptHTML(trx);
+            const defaultFilename = `Struk-${this.state.settings.namaToko.replace(/\s+/g, '-')}-${trx.id}.png`;
+            const content = `<div style="text-align: center; margin-bottom: 20px;"><i class="fa-solid fa-circle-check" style="color: var(--success-500); font-size: 48px;"></i><h3 style="margin-top: 15px;">Transaksi Berhasil!</h3></div><div style="border: 1px solid var(--neutral-200); border-radius: 8px; max-height: 300px; overflow-y: auto;">${receiptHTML}</div><div id="receipt-actions" style="margin-top: 25px;"><div class="form-group"><input type="text" id="receipt-filename" class="form-input" value="${defaultFilename}" placeholder=" "><label for="receipt-filename" class="form-label">Nama File Nota</label></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;"><button class="btn btn-secondary" data-action="saveReceipt"><i class="fa-solid fa-floppy-disk"></i> Simpan Nota</button><button class="btn btn-secondary" data-action="printThermalReceipt"><i class="fa-solid fa-print"></i> Cetak Struk</button></div><button class="btn btn-primary" data-action="finishTransaction" style="width: 100%;">Selesai (Transaksi Baru)</button></div>`;
+            this.showModal('Opsi Struk', content, null);
+            const modalFooter = document.querySelector('#modal-container .modal-content div[style*="text-align:right"]');
+            if(modalFooter) modalFooter.remove();
+        },
         showTransactionDetailModal(transactionId) { const trx = this.state.transactions.find(t => t.id === transactionId); if (!trx) return; const receiptHTML = this.generateReceiptHTML(trx); const content = `<div style="border: 1px solid var(--neutral-200); border-radius: 8px; max-height: 400px; overflow-y: auto;">${receiptHTML}</div>`; this.showModal(`Detail Transaksi: ${trx.id}`, content, null, '', false); const modalFooter = document.querySelector('.modal-content div[style*="text-align:right"]'); if (modalFooter) { modalFooter.innerHTML = `<button class="btn btn-secondary" data-action="printReceipt"><i class="fa-solid fa-print"></i> Cetak Ulang Struk</button>`; } },
         generateReceiptHTML(trx) { const { settings } = this.state; return `<div id="receipt-print-area" style="font-family: 'Courier New', monospace; color: #000; padding: 20px;"><div style="text-align:center;"><h3 style="margin:0; font-size: 18px;">${settings.namaToko}</h3><p style="margin:0; font-size: 12px;">${settings.alamatToko}</p><p style="margin:0; font-size: 12px;">Tel: ${settings.teleponToko}</p></div><hr style="border: 1px dashed #000; margin: 10px 0;"><table style="font-size: 12px; width: 100%;"><tr><td>No Trans:</td><td style="text-align:right;">${trx.id}</td></tr><tr><td>Kasir:</td><td style="text-align:right;">${trx.userName}</td></tr><tr><td>Tanggal:</td><td style="text-align:right;">${this.formatDate(trx.date, true)}</td></tr><tr><td>Pelanggan:</td><td style="text-align:right;">${trx.customerName}</td></tr></table><hr style="border: 1px dashed #000; margin: 10px 0;"><table style="font-size: 12px; width: 100%; border-collapse: collapse;">${trx.items.map(item => `<tr><td colspan="3">${item.name}</td></tr><tr><td style="padding-left: 10px;">${item.quantity} x ${this.formatRupiah(item.price)}</td><td></td><td style="text-align:right;">${this.formatRupiah(item.quantity * item.price)}</td></tr>`).join('')}</table><hr style="border: 1px dashed #000; margin: 10px 0;"><table style="font-size: 12px; width: 100%;"><tr><td>Subtotal</td><td style="text-align:right;">${this.formatRupiah(trx.subtotal)}</td></tr>${trx.totalDiscount > 0 ? `<tr><td>Diskon</td><td style="text-align:right;">-${this.formatRupiah(trx.totalDiscount)}</td></tr>` : ''}<tr><td style="font-weight:bold;">Total</td><td style="text-align:right; font-weight:bold;">${this.formatRupiah(trx.finalTotal)}</td></tr><tr><td>Metode Bayar</td><td style="text-align:right;">${trx.paymentMethod}</td></tr>${trx.paymentMethod === 'Tunai' ? `<tr><td>Bayar (Tunai)</td><td style="text-align:right;">${this.formatRupiah(trx.paidAmount)}</td></tr><tr><td>Kembali</td><td style="text-align:right;">${this.formatRupiah(trx.changeAmount)}</td></tr>` : ''}</table><hr style="border: 1px dashed #000; margin: 10px 0;"><div style="text-align:center; font-size: 12px;"><p>${settings.pesanDiStruk}</p></div></div>`;},
         
-        // --- Sisa fungsi CRUD dan lain-lain (salin dari kode asli) ---
-        // (Produk, Pelanggan, Biaya, Pengguna, Analitik, Lainnya, dll.)
-        // ... (Ini adalah salinan dari kode Anda yang sudah ada, dipastikan kompatibel)
+        // === 7. FUNGSI-FUNGSI ADMIN (CRUD LENGKAP) ===
         renderProduk() { return `<div class="page-container"><header class="header"><h1>Manajemen Produk</h1><button class="btn btn-primary" data-action="addProduct"><i class="fa-solid fa-plus"></i> Tambah Produk</button></header><div class="page-header"><input type="text" id="product-search" class="form-input" placeholder="Cari produk..." style="max-width:400px;"></div><div class="card" style="padding:0;"><div class="table-wrapper" id="product-table-container">${this.renderProductTable()}</div></div></div>`; },
-        renderProductTable(filter = '') { const container = document.getElementById('product-table-container'); const searchTerm = filter.toLowerCase(); const filtered = this.state.products.filter(p => p.name.toLowerCase().includes(searchTerm)); let tableHTML = `<table class="responsive-table"><thead><tr><th>Nama Produk</th><th>Kategori</th><th>Harga Jual</th><th>Stok</th><th>Aksi</th></tr></thead><tbody>`; if (filtered.length > 0) { filtered.forEach(p => { let stockBadge = p.stock <= 0 ? `<span class="stock-badge out">Habis</span>` : p.stock <= this.state.settings.lowStockThreshold ? `<span class="stock-badge low">${p.stock}</span>` : `<span class="stock-badge ok">${p.stock}</span>`; tableHTML += `<tr><td data-label="Nama">${p.name}</td><td data-label="Kategori">${p.category}</td><td data-label="Harga Jual">${this.formatRupiah(p.price)}</td><td data-label="Stok">${stockBadge}</td><td data-label="Aksi"><div class="actions"><button class="btn btn-text" data-action="editProduct" data-id="${p.id}"><i class="fa-solid fa-pen-to-square"></i></button><button class="btn btn-text" data-action="deleteProduct" data-id="${p.id}"><i class="fa-solid fa-trash"></i></button></div></td></tr>`; }); } else { tableHTML += `<tr><td colspan="5" style="text-align:center;">Produk tidak ditemukan.</td></tr>`; } tableHTML += `</tbody></table>`; if (container) container.innerHTML = tableHTML; else return tableHTML; },
-        // ... dan seterusnya untuk semua fungsi lainnya ...
+        renderProductTable(filter = '') { const container = document.getElementById('product-table-container'); const searchTerm = (filter || '').toLowerCase(); const filtered = this.state.products.filter(p => p.name.toLowerCase().includes(searchTerm)); let tableHTML = `<table class="responsive-table"><thead><tr><th>Nama Produk</th><th>Kategori</th><th>Harga Jual</th><th>Harga Modal</th><th>Stok</th><th>Aksi</th></tr></thead><tbody>`; if (filtered.length > 0) { filtered.forEach(p => { let stockBadge = p.stock <= 0 ? `<span class="stock-badge out">Habis</span>` : p.stock <= this.state.settings.lowStockThreshold ? `<span class="stock-badge low">${p.stock}</span>` : `<span class="stock-badge ok">${p.stock}</span>`; tableHTML += `<tr><td data-label="Nama">${p.name}</td><td data-label="Kategori">${p.category}</td><td data-label="Harga Jual">${this.formatRupiah(p.price)}</td><td data-label="Harga Modal">${this.formatRupiah(p.cost || 0)}</td><td data-label="Stok">${stockBadge}</td><td data-label="Aksi"><div class="actions"><button class="btn btn-text" data-action="editProduct" data-id="${p.id}"><i class="fa-solid fa-pen-to-square"></i></button><button class="btn btn-text" data-action="deleteProduct" data-id="${p.id}"><i class="fa-solid fa-trash"></i></button></div></td></tr>`; }); } else { tableHTML += `<tr><td colspan="6" style="text-align:center;">Produk tidak ditemukan.</td></tr>`; } tableHTML += `</tbody></table>`; if (container) container.innerHTML = tableHTML; else return tableHTML; },
+        showProductModal(productId) { const isEdit = productId !== undefined; const product = isEdit ? this.state.products.find(p => p.id == productId) : {}; const content = `<div class="form-group"><input type="text" id="p-name" class="form-input" placeholder=" " value="${product.name || ''}" required><label class="form-label">Nama Produk</label></div><div class="form-group"><input type="text" id="p-category" class="form-input" placeholder=" " value="${product.category || ''}" required><label class="form-label">Kategori</label></div><div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;"><div class="form-group"><input type="number" id="p-price" class="form-input" placeholder=" " value="${product.price || ''}" required min="0"><label class="form-label">Harga Jual</label></div><div class="form-group"><input type="number" id="p-cost" class="form-input" placeholder=" " value="${product.cost || ''}" required min="0"><label class="form-label">Harga Modal</label></div></div>${isEdit ? `<div class="form-group"><input type="number" id="p-stock-current" class="form-input" value="${product.stock}" disabled><label class="form-label">Stok Saat Ini</label></div><div class="form-group"><input type="number" id="p-stock-adjust" class="form-input" placeholder=" "><label class="form-label">Jumlah Penyesuaian Stok (+/-)</label></div>` : `<div class="form-group"><input type="number" id="p-stock-initial" class="form-input" placeholder=" " value="0" required min="0"><label class="form-label">Stok Awal</label></div>`}`; this.showModal(isEdit ? 'Edit Produk' : 'Tambah Produk', content, () => this.saveProduct(productId)); },
+        saveProduct(productId) {
+            const name = document.getElementById('p-name').value.trim();
+            const price = parseFloat(document.getElementById('p-price').value);
+            const cost = parseFloat(document.getElementById('p-cost').value);
+            if (!name || isNaN(price) || isNaN(cost)) return false;
+            
+            const productData = { name, category: document.getElementById('p-category').value.trim(), price, cost };
 
-        // --- [DIPERBARUI] initCarousel dengan slideshow otomatis 3 detik ---
-        initCarousel() {
-            const carousel = document.getElementById('dashboard-carousel');
-            if (!carousel) return;
-            const track = carousel.querySelector('.carousel-track');
-            const slides = Array.from(track.children);
-            const dots = Array.from(carousel.querySelectorAll('.carousel-dot'));
-            if (slides.length <= 1) return;
+            if (productId) {
+                const index = this.state.products.findIndex(p => p.id == productId);
+                const product = this.state.products[index];
+                
+                const stockAdjustInput = document.getElementById('p-stock-adjust');
+                if (stockAdjustInput && stockAdjustInput.value.trim() !== '') {
+                    const change = parseInt(stockAdjustInput.value);
+                    if (!isNaN(change)) {
+                        const oldStock = product.stock;
+                        const newStock = oldStock + change;
+                        if (newStock < 0) {
+                            this.showToast('Stok tidak boleh kurang dari nol.', 'error');
+                            return false;
+                        }
+                        product.stock = newStock;
+                        this.addStockLog(product.id, change, oldStock, newStock, 'Penyesuaian saat edit');
+                    }
+                }
+                this.state.products[index] = { ...product, ...productData };
+            } else {
+                const initialStock = parseInt(document.getElementById('p-stock-initial').value);
+                if(isNaN(initialStock)) return false;
+                productData.stock = initialStock;
+                productData.id = Date.now();
+                productData.imageUrl = null;
+                this.state.products.push(productData);
+                this.addStockLog(productData.id, initialStock, 0, initialStock, 'Stok Awal');
+            }
 
-            let currentIndex = 0;
-            const goToSlide = (index) => {
-                if(!track || !dots[index]) return;
-                track.style.transform = `translateX(-${index * 100}%)`;
-                dots.forEach(dot => dot.classList.remove('active'));
-                dots[index].classList.add('active');
-                currentIndex = index;
-            };
-
-            dots.forEach(dot => {
-                dot.addEventListener('click', e => {
-                    const targetIndex = parseInt(e.target.dataset.slideTo);
-                    goToSlide(targetIndex);
-                    // Reset interval saat user berinteraksi
-                    clearInterval(this.carouselInterval);
-                    this.carouselInterval = setInterval(autoSlide, 3000); 
-                });
-            });
-
-            const autoSlide = () => {
-                const nextIndex = (currentIndex + 1) % slides.length;
-                goToSlide(nextIndex);
-            };
-
-            // Memulai slideshow otomatis
-            this.carouselInterval = setInterval(autoSlide, 3000); // 3 detik
+            this.saveToLocalStorage('products', this.state.products);
+            this.saveToLocalStorage('stockHistory', this.state.stockHistory);
+            this.showPage('produk');
+            this.showToast(`Produk berhasil ${productId ? 'diperbarui' : 'ditambahkan'}.`);
+            return true;
+        },
+        deleteProduct(productId) { this.showConfirmModal('Hapus Produk?', 'Anda yakin ingin menghapus produk ini?', () => { this.state.products = this.state.products.filter(p => p.id != productId); this.saveToLocalStorage('products', this.state.products); this.showPage('produk'); this.showToast('Produk berhasil dihapus.'); }); },
+        addStockLog(productId, change, from, to, reason) { this.state.stockHistory.unshift({ id: 'STK-' + Date.now(), productId, date: new Date().toISOString(), change, from, to, reason, userId: this.state.currentUser.id, userName: this.state.currentUser.name }); },
+        renderPelanggan() { return `<div class="page-container"><header class="header"><h1>Pelanggan</h1><button class="btn btn-primary" data-action="addCustomer"><i class="fa-solid fa-plus"></i> Tambah Pelanggan</button></header><div class="page-header"><input type="text" id="customer-search" class="form-input" placeholder="Cari nama atau no. HP..." style="max-width:400px;"></div><div class="card" style="padding:0;"><div class="table-wrapper" id="customer-table-container">${this.renderCustomerTable()}</div></div></div>`; },
+        renderCustomerTable(filter = '') { const container = document.getElementById('customer-table-container'); const searchTerm = (filter || '').toLowerCase(); const filtered = this.state.customers.filter(c => c.name.toLowerCase().includes(searchTerm) || (c.phone && c.phone.includes(searchTerm))); let tableHTML = `<table class="responsive-table"><thead><tr><th>Nama</th><th>No. HP</th><th>Total Belanja</th><th>Kunjungan</th><th>Aksi</th></tr></thead><tbody>`; if(filtered.length > 0) { filtered.forEach(c => { tableHTML += `<tr><td data-label="Nama">${c.name}</td><td data-label="No. HP">${c.phone || '-'}</td><td data-label="Total Belanja">${this.formatRupiah(c.totalSpent || 0)}</td><td data-label="Kunjungan">${c.visitCount || 0}</td><td data-label="Aksi"><div class="actions"><button class="btn btn-text" data-action="editCustomer" data-id="${c.id}"><i class="fa-solid fa-pen-to-square"></i></button><button class="btn btn-text" data-action="deleteCustomer" data-id="${c.id}"><i class="fa-solid fa-trash"></i></button></div></td></tr>`; }); } else { tableHTML += `<tr><td colspan="5" style="text-align:center;">Pelanggan tidak ditemukan.</td></tr>`; } tableHTML += `</tbody></table>`; if(container) container.innerHTML = tableHTML; else return tableHTML; },
+        showCustomerModal(customerId) { const isEdit = customerId !== undefined; const customer = isEdit ? this.state.customers.find(c => c.id == customerId) : {}; const content = `<div class="form-group"><input type="text" id="c-name" class="form-input" placeholder=" " required value="${customer.name || ''}"><label class="form-label">Nama</label></div><div class="form-group"><input type="tel" id="c-phone" class="form-input" placeholder=" " value="${customer.phone || ''}"><label class="form-label">No. HP (Opsional)</label></div>`; this.showModal(isEdit ? 'Edit Pelanggan' : 'Tambah Pelanggan', content, () => this.saveCustomer(customerId)); },
+        saveCustomer(customerId) { const name = document.getElementById('c-name').value.trim(); const phone = document.getElementById('c-phone').value.trim(); if (!name) return false; if (customerId) { const index = this.state.customers.findIndex(c => c.id == customerId); this.state.customers[index] = { ...this.state.customers[index], name, phone }; } else { this.state.customers.push({ id: Date.now(), name, phone, totalSpent: 0, visitCount: 0 }); } this.saveToLocalStorage('customers', this.state.customers); this.showPage('pelanggan'); this.showToast(`Pelanggan berhasil ${customerId ? 'diperbarui' : 'ditambahkan'}.`); return true; },
+        deleteCustomer(customerId) { this.showConfirmModal('Hapus Pelanggan?', 'Anda yakin ingin menghapus pelanggan ini?', () => { this.state.customers = this.state.customers.filter(c => c.id != customerId); this.saveToLocalStorage('customers', this.state.customers); this.showPage('pelanggan'); this.showToast('Pelanggan berhasil dihapus.'); }); },
+        renderBiaya() { const today = new Date().toISOString().slice(0, 10); return `<div class="page-container"><header class="header"><h1>Biaya Operasional</h1><button class="btn btn-primary" data-action="addExpense"><i class="fa-solid fa-plus"></i> Tambah Biaya</button></header><div class="page-header" style="gap: 15px;"><div class="form-group" style="margin:0; flex:1;"><input type="date" id="expense-start" class="form-input" value="${today}"><label class="form-label has-value">Dari Tanggal</label></div><div class="form-group" style="margin:0; flex:1;"><input type="date" id="expense-end" class="form-input" value="${today}"><label class="form-label has-value">Sampai Tanggal</label></div></div><div class="card" style="padding:0;"><div class="table-wrapper" id="expense-table-container">${this.renderExpenseTable()}</div></div></div>`; },
+        renderExpenseTable() { const container = document.getElementById('expense-table-container'); if (!container && this.state.currentPage !== 'biaya') return ''; const startEl = document.getElementById('expense-start'); const endEl = document.getElementById('expense-end'); const filtered = (startEl && endEl) ? this.state.expenses.filter(e => { const start = new Date(startEl.value); const end = new Date(endEl.value); start.setHours(0, 0, 0, 0); end.setHours(23, 59, 59, 999); const eDate = new Date(e.date); return eDate >= start && eDate <= end; }) : this.state.expenses; let tableHTML = `<table class="responsive-table"><thead><tr><th>Tanggal</th><th>Deskripsi</th><th>Jumlah</th><th>Aksi</th></tr></thead><tbody>`; if (filtered.length > 0) { filtered.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(e => { tableHTML += `<tr><td data-label="Tanggal">${this.formatDate(e.date)}</td><td data-label="Deskripsi">${e.description}</td><td data-label="Jumlah">${this.formatRupiah(e.amount)}</td><td data-label="Aksi"><div class="actions"><button class="btn btn-text" data-action="editExpense" data-id="${e.id}"><i class="fa-solid fa-pen-to-square"></i></button><button class="btn btn-text" data-action="deleteExpense" data-id="${e.id}"><i class="fa-solid fa-trash"></i></button></div></td></tr>`; }); } else { tableHTML += `<tr><td colspan="4" style="text-align:center;">Tidak ada biaya ditemukan.</td></tr>`; } tableHTML += `</tbody></table>`; if(container) container.innerHTML = tableHTML; else return tableHTML;},
+        showExpenseModal(expenseId) { const isEdit = expenseId !== undefined; const expense = isEdit ? this.state.expenses.find(e => e.id == expenseId) : {}; const content = `<div class="form-group"><input type="date" id="e-date" class="form-input" required value="${(expense.date || new Date().toISOString()).slice(0,10)}"><label class="form-label has-value">Tanggal</label></div><div class="form-group"><input type="text" id="e-desc" class="form-input" placeholder=" " required value="${expense.description || ''}"><label class="form-label">Deskripsi</label></div><div class="form-group"><input type="number" id="e-amount" class="form-input" placeholder=" " required min="0" value="${expense.amount || ''}"><label class="form-label">Jumlah</label></div>`; this.showModal(isEdit ? 'Edit Biaya' : 'Tambah Biaya', content, () => this.saveExpense(expenseId)); },
+        saveExpense(expenseId) { const date = document.getElementById('e-date').value; const description = document.getElementById('e-desc').value.trim(); const amount = parseFloat(document.getElementById('e-amount').value); if (!date || !description || isNaN(amount)) return false; if (expenseId) { const index = this.state.expenses.findIndex(e => e.id == expenseId); this.state.expenses[index] = { ...this.state.expenses[index], date, description, amount }; } else { this.state.expenses.push({ id: Date.now(), date, description, amount }); } this.saveToLocalStorage('expenses', this.state.expenses); this.showPage('biaya'); this.showToast(`Biaya berhasil ${expenseId ? 'diperbarui' : 'ditambahkan'}.`); return true; },
+        deleteExpense(expenseId) { this.showConfirmModal('Hapus Biaya?', 'Anda yakin ingin menghapus biaya ini?', () => { this.state.expenses = this.state.expenses.filter(e => e.id != expenseId); this.saveToLocalStorage('expenses', this.state.expenses); this.showPage('biaya'); this.showToast('Biaya berhasil dihapus.'); }); },
+        renderPengguna() { return `<div class="page-container"><header class="header"><h1>Manajemen Pengguna</h1><button class="btn btn-primary" data-action="addUser"><i class="fa-solid fa-user-plus"></i> Tambah Pengguna</button></header><div class="page-header"><input type="text" id="user-search" class="form-input" placeholder="Cari nama atau username..." style="max-width:400px;"></div><div class="card" style="padding:0;"><div class="table-wrapper" id="user-table-container">${this.renderUserTable()}</div></div></div>`; },
+        renderUserTable(filter = '') { const container = document.getElementById('user-table-container'); const searchTerm = (filter || '').toLowerCase(); const filtered = this.state.staff.filter(u => u.name.toLowerCase().includes(searchTerm) || u.username.toLowerCase().includes(searchTerm)); let tableHTML = `<table class="responsive-table"><thead><tr><th>Nama Lengkap</th><th>Username</th><th>Peran</th><th>Aksi</th></tr></thead><tbody>`; if(filtered.length > 0) { filtered.forEach(u => { tableHTML += `<tr><td data-label="Nama">${u.name}</td><td data-label="Username">${u.username}</td><td data-label="Peran">${u.role}</td><td data-label="Aksi"><div class="actions">${u.id !== 1 ? `<button class="btn btn-text" data-action="editUser" data-id="${u.id}"><i class="fa-solid fa-pen-to-square"></i></button><button class="btn btn-text" data-action="deleteUser" data-id="${u.id}"><i class="fa-solid fa-trash"></i></button>` : '<span>Admin Utama</span>'}</div></td></tr>`; }); } else { tableHTML += `<tr><td colspan="4" style="text-align:center;">Pengguna tidak ditemukan.</td></tr>`; } tableHTML += `</tbody></table>`; if(container) container.innerHTML = tableHTML; else return tableHTML; },
+        showUserModal(userId) { const isEdit = userId !== undefined; const user = isEdit ? this.state.staff.find(u => u.id == userId) : {}; const content = `<div class="form-group"><input type="text" id="u-name" class="form-input" placeholder=" " required value="${user.name || ''}"><label class="form-label">Nama Lengkap</label></div><div class="form-group"><input type="text" id="u-username" class="form-input" placeholder=" " required value="${user.username || ''}"><label class="form-label">Username</label></div><div class="form-group"><input type="password" id="u-pin" class="form-input" placeholder=" " ${isEdit ? '' : 'required'} inputmode="numeric"><label class="form-label">PIN ${isEdit ? '(Biarkan kosong jika tidak berubah)' : ''}</label></div><div class="form-group"><select id="u-role" class="form-input" required><option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option><option value="kasir" ${user.role === 'kasir' ? 'selected' : ''}>Kasir</option></select><label class="form-label">Peran</label></div>`; this.showModal(isEdit ? 'Edit Pengguna' : 'Tambah Pengguna', content, () => this.saveUser(userId)); },
+        saveUser(userId) { const name = document.getElementById('u-name').value.trim(); const username = document.getElementById('u-username').value.trim(); const pin = document.getElementById('u-pin').value; const role = document.getElementById('u-role').value; if (!name || !username) return false; if (userId) { const index = this.state.staff.findIndex(u => u.id == userId); const currentUser = this.state.staff[index]; this.state.staff[index] = { ...currentUser, name, username, role, pin: pin ? pin : currentUser.pin }; } else { if (!pin) { this.showToast('PIN wajib diisi untuk pengguna baru.', 'error'); return false; } this.state.staff.push({ id: Date.now(), name, username, pin, role }); } this.saveToLocalStorage('staff', this.state.staff); this.showPage('pengguna'); this.showToast(`Pengguna berhasil ${userId ? 'diperbarui' : 'ditambahkan'}.`); return true; },
+        deleteUser(userId) { if (userId == 1) { this.showToast('Admin utama tidak dapat dihapus.', 'error'); return; } this.showConfirmModal('Hapus Pengguna?', 'Anda yakin ingin menghapus pengguna ini?', () => { this.state.staff = this.state.staff.filter(u => u.id != userId); this.saveToLocalStorage('staff', this.state.staff); this.showPage('pengguna'); this.showToast('Pengguna berhasil dihapus.'); }); },
+        renderAnalitik() { const today = new Date().toISOString().slice(0, 10); return `<div class="page-container"><header class="header"><h1>Analitik & Laporan</h1></header><div class="card"><div style="display:flex; gap:15px; flex-wrap:wrap; align-items:center; justify-content:space-between;"><div style="display:flex; gap:15px; flex-wrap:wrap; align-items:center;"><div class="form-group" style="margin-bottom:0;"><input type="date" id="report-start" class="form-input" value="${today}"><label class="form-label has-value">Mulai</label></div><div class="form-group" style="margin-bottom:0;"><input type="date" id="report-end" class="form-input" value="${today}"><label class="form-label has-value">Selesai</label></div></div><button id="generate-report-btn" class="btn btn-primary"><i class="fa-solid fa-arrows-rotate"></i> Tampilkan</button></div></div><div id="report-results"></div></div>`; },
+        renderAnalyticsPage() {
+            const resultsContainer = document.getElementById('report-results'); if (!resultsContainer) return;
+            const start = new Date(document.getElementById('report-start').value); const end = new Date(document.getElementById('report-end').value); end.setHours(23, 59, 59, 999);
+            const trx = this.state.transactions.filter(t => { const tDate = new Date(t.date); return tDate >= start && tDate <= end; });
+            const totalRevenue = trx.reduce((sum, t) => sum + t.finalTotal, 0); const totalTransactions = trx.length;
+            const productSales = {}; trx.forEach(t => t.items.forEach(item => { productSales[item.name] = (productSales[item.name] || 0) + item.quantity; }));
+            const sortedProducts = Object.entries(productSales).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            resultsContainer.innerHTML = `<div class="stats-grid"><div class="stat-card"><h4>Total Pendapatan</h4><p class="stat-card-value">${this.formatRupiah(totalRevenue)}</p></div><div class="stat-card"><h4>Total Transaksi</h4><p class="stat-card-value">${totalTransactions}</p></div><div class="stat-card"><h4>Rata-rata / Transaksi</h4><p class="stat-card-value">${this.formatRupiah(totalTransactions > 0 ? totalRevenue / totalTransactions : 0)}</p></div></div><div class="card"><div class="chart-container"><canvas id="salesChart"></canvas></div></div><div class="card"><h4>Produk Terlaris</h4><div class="table-wrapper"><table class="responsive-table"><thead><tr><th>Nama Produk</th><th>Jumlah Terjual</th></tr></thead><tbody>${sortedProducts.length > 0 ? sortedProducts.map(([name, qty]) => `<tr><td data-label="Produk">${name}</td><td data-label="Jumlah">${qty}</td></tr>`).join('') : '<tr><td colspan="2">Tidak ada data penjualan.</td></tr>'}</tbody></table></div></div>`;
+            if (trx.length > 0) this.renderSalesChart(trx);
+        },
+        renderSalesChart(transactions) {
+            const ctx = document.getElementById('salesChart')?.getContext('2d'); if (!ctx) return;
+            const salesByDate = transactions.reduce((acc, curr) => { const date = curr.date.split('T')[0]; acc[date] = (acc[date] || 0) + curr.finalTotal; return acc; }, {});
+            const sortedDates = Object.keys(salesByDate).sort((a, b) => new Date(a) - new Date(b));
+            this.charts.salesChart = new Chart(ctx, { type: 'line', data: { labels: sortedDates, datasets: [{ label: 'Pendapatan', data: sortedDates.map(date => salesByDate[date]), borderColor: 'var(--primary-500)', backgroundColor: 'rgba(59, 130, 246, 0.1)', fill: true, tension: 0.3 }] }, options: { maintainAspectRatio: false, scales: { x: { type: 'time', time: { unit: 'day' } } } } });
         },
 
-        // --- [DIPERBARUI] handleUploader untuk menangani banner ---
+        // === 8. UTILITAS LAINNYA ===
+        initCarousel() {
+            const carousel = document.getElementById('dashboard-carousel'); if (!carousel) return;
+            const track = carousel.querySelector('.carousel-track'); const slides = Array.from(track.children); const dots = Array.from(carousel.querySelectorAll('.carousel-dot'));
+            if (slides.length <= 1) return;
+            let currentIndex = 0;
+            const goToSlide = (index) => { if(!track || !dots[index]) return; track.style.transform = `translateX(-${index * 100}%)`; dots.forEach(dot => dot.classList.remove('active')); dots[index].classList.add('active'); currentIndex = index; };
+            dots.forEach(dot => { dot.addEventListener('click', e => { const targetIndex = parseInt(e.target.dataset.slideTo); goToSlide(targetIndex); clearInterval(this.carouselInterval); this.carouselInterval = setInterval(autoSlide, 3000); }); });
+            const autoSlide = () => { const nextIndex = (currentIndex + 1) % slides.length; goToSlide(nextIndex); };
+            this.carouselInterval = setInterval(autoSlide, 3000);
+        },
         handleUploader(type, files) {
             if (!files || files.length === 0) return;
-
             if (type === 'dashboardBanners') {
                 const currentBanners = this.state.settings.dashboardBanners || [];
                 const slotsAvailable = 5 - currentBanners.length;
-                if (files.length > slotsAvailable) {
-                    this.showToast(`Anda hanya bisa menambahkan ${slotsAvailable} banner lagi.`, 'warning');
-                }
+                if (files.length > slotsAvailable) { this.showToast(`Anda hanya bisa menambahkan ${slotsAvailable} banner lagi.`, 'warning'); }
                 const filesToProcess = Array.from(files).slice(0, slotsAvailable);
-                
-                const promises = filesToProcess.map(file => new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = e => resolve(e.target.result);
-                    reader.onerror = error => reject(error);
-                    reader.readAsDataURL(file);
-                }));
-
-                Promise.all(promises)
-                    .then(base64results => {
-                        this.state.settings.dashboardBanners.push(...base64results);
-                        this.saveToLocalStorage('settings', this.state.settings);
-                        this.showPage('pengaturan'); // Render ulang untuk menampilkan pratinjau
-                        this.showToast(`${base64results.length} banner berhasil ditambahkan.`, 'success');
-                    })
-                    .catch(error => {
-                        console.error("Error processing banner images:", error);
-                        this.showToast('Gagal memproses gambar banner.', 'error');
-                    });
+                const promises = filesToProcess.map(file => new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = e => resolve(e.target.result); reader.onerror = error => reject(error); reader.readAsDataURL(file); }));
+                Promise.all(promises).then(base64results => {
+                    this.state.settings.dashboardBanners.push(...base64results);
+                    this.saveToLocalStorage('settings', this.state.settings);
+                    this.showPage('pengaturan');
+                    this.showToast(`${base64results.length} banner berhasil ditambahkan.`, 'success');
+                }).catch(error => { console.error("Error processing banner images:", error); this.showToast('Gagal memproses gambar banner.', 'error'); });
             }
         },
         toggleMobileCart(show) {
-            const cartContainer = document.getElementById('cart-container');
-            const body = document.body;
+            const cartContainer = document.getElementById('cart-container'); const body = document.body;
             if (cartContainer) {
-                if (show) {
-                    body.classList.add('mobile-cart-open');
-                    cartContainer.classList.add('is-visible');
-                } else {
-                    body.classList.remove('mobile-cart-open');
-                    cartContainer.classList.remove('is-visible');
-                }
+                if (show) { body.classList.add('mobile-cart-open'); cartContainer.classList.add('is-visible'); } 
+                else { body.classList.remove('mobile-cart-open'); cartContainer.classList.remove('is-visible'); }
             }
         },
     };
-
     App.init();
 });
 </script>
