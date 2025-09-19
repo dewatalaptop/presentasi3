@@ -732,6 +732,55 @@ document.addEventListener('DOMContentLoaded', () => {
         showPaymentSuccessModal(transactionId) { const trx = this.state.transactions.find(t => t.id === transactionId); if (!trx) return; const receiptHTML = this.generateReceiptHTML(trx); const content = `<div style="text-align: center; margin-bottom: 20px;"><i class="fa-solid fa-circle-check" style="color: var(--success-500); font-size: 48px;"></i><h3 style="margin-top: 15px;">Transaksi Berhasil!</h3></div><div style="border: 1px solid var(--neutral-200); border-radius: 8px; max-height: 300px; overflow-y: auto;">${receiptHTML}</div>`; this.showModal('Pembayaran Selesai', content, null, '', false); const modalFooter = document.querySelector('.modal-content div[style*="text-align:right"]'); if (modalFooter) { modalFooter.id = "payment-success-actions"; modalFooter.innerHTML = `<button class="btn btn-secondary" data-action="printReceipt"><i class="fa-solid fa-print"></i> Cetak Struk</button><button class="btn btn-primary" data-action="finishTransaction">Selesai (Transaksi Baru)</button>`; } },
         showTransactionDetailModal(transactionId) { const trx = this.state.transactions.find(t => t.id === transactionId); if (!trx) { this.showToast('Transaksi tidak ditemukan.', 'error'); return; } const receiptHTML = this.generateReceiptHTML(trx); this.showModal(`Detail Transaksi: ${trx.id}`, receiptHTML, null, '', false); const modalFooter = document.querySelector('.modal-content div[style*="text-align:right"]'); if (modalFooter) { modalFooter.innerHTML = `<button class="btn btn-secondary" data-action="printReceipt"><i class="fa-solid fa-print"></i> Cetak Ulang Struk</button>`; } },
         generateReceiptHTML(trx) { const { settings } = this.state; return `<div id="receipt-print-area" style="font-family: 'Courier New', monospace; color: #000; padding: 20px;"><div style="text-align:center;"><h3 style="margin:0; font-size: 18px;">${settings.namaToko}</h3><p style="margin:0; font-size: 12px;">${settings.alamatToko}</p><p style="margin:0; font-size: 12px;">Tel: ${settings.teleponToko}</p></div><hr style="border: 1px dashed #000; margin: 10px 0;"><table style="font-size: 12px; width: 100%;"><tr><td>No Trans:</td><td style="text-align:right;">${trx.id}</td></tr><tr><td>Kasir:</td><td style="text-align:right;">${trx.userName}</td></tr><tr><td>Tanggal:</td><td style="text-align:right;">${this.formatDate(trx.date, true)}</td></tr><tr><td>Pelanggan:</td><td style="text-align:right;">${trx.customerName}</td></tr></table><hr style="border: 1px dashed #000; margin: 10px 0;"><table style="font-size: 12px; width: 100%; border-collapse: collapse;">${trx.items.map(item => `<tr><td colspan="3">${item.name}</td></tr><tr><td style="padding-left: 10px;">${item.quantity} x ${this.formatRupiah(item.price)}</td><td></td><td style="text-align:right;">${this.formatRupiah(item.quantity * item.price)}</td></tr>`).join('')}</table><hr style="border: 1px dashed #000; margin: 10px 0;"><table style="font-size: 12px; width: 100%;"><tr><td>Subtotal</td><td style="text-align:right;">${this.formatRupiah(trx.subtotal)}</td></tr>${trx.totalDiscount > 0 ? `<tr><td>Diskon</td><td style="text-align:right;">-${this.formatRupiah(trx.totalDiscount)}</td></tr>` : ''}<tr><td style="font-weight:bold;">Total</td><td style="text-align:right; font-weight:bold;">${this.formatRupiah(trx.finalTotal)}</td></tr><tr><td>Metode Bayar</td><td style="text-align:right;">${trx.paymentMethod}</td></tr>${trx.paymentMethod === 'Tunai' ? `<tr><td>Bayar (Tunai)</td><td style="text-align:right;">${this.formatRupiah(trx.paidAmount)}</td></tr><tr><td>Kembali</td><td style="text-align:right;">${this.formatRupiah(trx.changeAmount)}</td></tr>` : ''}</table><hr style="border: 1px dashed #000; margin: 10px 0;"><div style="text-align:center; font-size: 12px;"><p>${settings.pesanDiStruk}</p></div></div>`;},
+                // --- [FUNGSI BARU] --- Membuat HTML untuk Bill dari data transaksi
+        generateBillHTML(trx) {
+            const { settings } = this.state;
+            const { subtotal, totalDiscount, finalTotal } = this.calculateCartTotals(trx.items);
+            
+            // Mencari nama meja jika transaksi berasal dari pesanan meja
+            let orderSource = trx.customerName; // Default ke nama pelanggan
+            const tableOrder = Object.values(this.state.activeOrders).find(order => order.id === trx.orderId);
+            if (tableOrder) {
+                orderSource = tableOrder.name;
+            } else if (this.state.settings.posMode === 'retail' || !trx.orderId) {
+                orderSource = 'Take Away / Retail';
+            }
+
+            return `<div id="receipt-print-area" style="font-family: 'Courier New', monospace; color: #000; padding: 20px;">
+                <div style="text-align:center;">
+                    <h3 style="margin:0; font-size: 18px;">${settings.namaToko}</h3>
+                    <p style="margin:0; font-size: 12px;">${settings.alamatToko}</p>
+                    <p style="margin:0; font-size: 12px;">Tel: ${settings.teleponToko}</p>
+                </div>
+                <hr style="border: 1px dashed #000; margin: 10px 0;">
+                <table style="font-size: 12px; width: 100%;">
+                    <tr><td>Order:</td><td style="text-align:right;">${orderSource}</td></tr>
+                    <tr><td>Kasir:</td><td style="text-align:right;">${trx.userName}</td></tr>
+                    <tr><td>Tanggal:</td><td style="text-align:right;">${this.formatDate(trx.date, true)}</td></tr>
+                </table>
+                <hr style="border: 1px dashed #000; margin: 10px 0;">
+                <div style="text-align:center; font-size:14px; font-weight:bold; margin-bottom:10px;">*** BILL PESANAN ***</div>
+                <table style="font-size: 12px; width: 100%; border-collapse: collapse;">
+                    ${trx.items.map(item => `
+                        <tr><td colspan="3">${item.name}</td></tr>
+                        <tr>
+                            <td style="padding-left: 10px;">${item.quantity} x ${this.formatRupiah(item.originalPrice || item.price)}</td>
+                            <td></td>
+                            <td style="text-align:right;">${this.formatRupiah(item.quantity * (item.originalPrice || item.price))}</td>
+                        </tr>
+                    `).join('')}
+                </table>
+                <hr style="border: 1px dashed #000; margin: 10px 0;">
+                <table style="font-size: 12px; width: 100%;">
+                    <tr><td>Subtotal</td><td style="text-align:right;">${this.formatRupiah(subtotal)}</td></tr>
+                    ${totalDiscount > 0 ? `<tr><td>Diskon</td><td style="text-align:right;">-${this.formatRupiah(totalDiscount)}</td></tr>` : ''}
+                    <tr><td style="font-weight:bold;">Total Tagihan</td><td style="text-align:right; font-weight:bold;">${this.formatRupiah(finalTotal)}</td></tr>
+                </table>
+                <hr style="border: 1px dashed #000; margin: 10px 0;">
+                <div style="text-align:center; font-size: 12px;"><p>Ini bukan bukti pembayaran.</p></div>
+            </div>`;
+        },
+
         showBillModal() { const items = this.getCurrentCartItems(); if (items.length === 0) { this.showToast('Keranjang kosong.', 'warning'); return; } const { settings } = this.state; const { subtotal, totalDiscount, finalTotal } = this.calculateCartTotals(items); let orderSource = this.state.activeTransaction.orderId ? this.state.activeOrders[this.state.activeTransaction.orderId].name : 'Take Away'; const billHTML = `<div id="receipt-print-area" style="font-family: 'Courier New', monospace; color: #000; padding: 20px;"><div style="text-align:center;"><h3 style="margin:0; font-size: 18px;">${settings.namaToko}</h3><p style="margin:0; font-size: 12px;">${settings.alamatToko}</p><p style="margin:0; font-size: 12px;">Tel: ${settings.teleponToko}</p></div><hr style="border: 1px dashed #000; margin: 10px 0;"><table style="font-size: 12px; width: 100%;"><tr><td>Order:</td><td style="text-align:right;">${orderSource}</td></tr><tr><td>Kasir:</td><td style="text-align:right;">${this.state.currentUser.name}</td></tr><tr><td>Tanggal:</td><td style="text-align:right;">${this.formatDate(new Date().toISOString(), true)}</td></tr></table><hr style="border: 1px dashed #000; margin: 10px 0;"><div style="text-align:center; font-size:14px; font-weight:bold; margin-bottom:10px;">*** PRE-BILL ***</div><table style="font-size: 12px; width: 100%; border-collapse: collapse;">${items.map(item => `<tr><td colspan="3">${item.name}</td></tr><tr><td style="padding-left: 10px;">${item.quantity} x ${this.formatRupiah(item.price)}</td><td></td><td style="text-align:right;">${this.formatRupiah(item.quantity * item.price)}</td></tr>`).join('')}</table><hr style="border: 1px dashed #000; margin: 10px 0;"><table style="font-size: 12px; width: 100%;"><tr><td>Subtotal</td><td style="text-align:right;">${this.formatRupiah(subtotal)}</td></tr>${totalDiscount > 0 ? `<tr><td>Diskon</td><td style="text-align:right;">-${this.formatRupiah(totalDiscount)}</td></tr>` : ''}<tr><td style="font-weight:bold;">Total</td><td style="text-align:right; font-weight:bold;">${this.formatRupiah(finalTotal)}</td></tr></table><hr style="border: 1px dashed #000; margin: 10px 0;"><div style="text-align:center; font-size: 12px;"><p>Ini bukan bukti pembayaran.</p></div></div>`; this.showModal('Bill Pesanan', billHTML, null, '', false); const modalFooter = document.querySelector('.modal-content div[style*="text-align:right"]'); if (modalFooter) { modalFooter.innerHTML = `<button class="btn btn-secondary" data-action="printReceipt"><i class="fa-solid fa-print"></i> Cetak Bill</button>`; } },
         calculateCartTotals(items) { const subtotal = items.reduce((sum, item) => sum + (item.originalPrice || item.price) * item.quantity, 0); const { items: itemsWithPromo } = this.applyPromotions(items); const finalTotal = itemsWithPromo.reduce((sum, item) => sum + item.price * item.quantity, 0); const totalDiscount = subtotal - finalTotal; return { subtotal, totalDiscount, finalTotal }; },
         applyPromotions(cartItems) { let processedItems = JSON.parse(JSON.stringify(cartItems)); processedItems.forEach(item => { item.price = item.originalPrice; }); for (const promo of this.state.promotions) { if (promo.type === 'happy_hour') { const now = new Date(); const currentDay = now.getDay(); const currentHour = now.getHours(); if (promo.rules.days.includes(currentDay) && currentHour >= promo.rules.startHour && currentHour < promo.rules.endHour) { processedItems.forEach(item => { if (promo.rules.targetCategory === 'Semua' || item.category === promo.rules.targetCategory) { if (item.price === item.originalPrice) { item.price = item.price * (1 - promo.discount.value / 100); } } }); } } } return { items: processedItems }; },
