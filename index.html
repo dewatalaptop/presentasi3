@@ -802,6 +802,45 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>`;
         },
+        // --- [FUNGSI BARU & AKTIF] Untuk menampilkan menu di halaman "Lainnya" ---
+        renderLainnya() {
+            // Daftar menu yang hanya bisa diakses oleh admin
+            const adminMenus = [
+                { id: 'produk', icon: 'fa-solid fa-box-open', label: 'Produk'},
+                { id: 'analitik', icon: 'fa-solid fa-chart-line', label: 'Analitik'},
+                { id: 'pelanggan', icon: 'fa-solid fa-users', label: 'Pelanggan'},
+                { id: 'biaya', icon: 'fa-solid fa-wallet', label: 'Biaya'},
+                { id: 'pengguna', icon: 'fa-solid fa-user-shield', label: 'Pengguna'},
+                { id: 'pengaturan', icon: 'fa-solid fa-gear', label: 'Pengaturan'}
+            ];
+
+            // Cek apakah pengguna saat ini adalah admin
+            // Jika ya, buat daftar menu admin. Jika tidak, buat daftar kosong.
+            const menuItemsHTML = (this.state.currentUser.role === 'admin' ? adminMenus : [])
+                .map(item => `
+                    <li class="lainnya-menu-item">
+                        <a href="#" class="nav-link" data-page="${item.id}">
+                            <i class="${item.icon}"></i>${item.label}
+                        </a>
+                    </li>
+                `).join('');
+
+            // Kembalikan struktur HTML untuk halaman "Lainnya"
+            // Menu "Keluar" akan selalu tampil untuk semua role
+            return `<div class="page-container">
+                        <header class="header">
+                            <h1>Lainnya</h1>
+                        </header>
+                        <ul class="lainnya-menu">
+                            ${menuItemsHTML}
+                            <li class="lainnya-menu-item">
+                                <a href="#" data-action="logout">
+                                    <i class="fa-solid fa-right-from-bracket"></i>Keluar
+                                </a>
+                            </li>
+                        </ul>
+                    </div>`; 
+        },
 
         // === SISA FUNGSI (KERANJANG, PRODUK, DLL.) ===
         // (Salin semua sisa fungsi dari kode asli Anda ke sini, mulai dari `getCurrentCartItems` hingga akhir)
