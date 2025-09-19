@@ -811,7 +811,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         renderPengaturan() { return `<div class="page-container"><header class="header"><h1>Pengaturan</h1></header><div class="card"><h2>Pengaturan Toko</h2><form id="settings-form" novalidate><div class="form-group"><input type="text" id="s-namaToko" class="form-input" placeholder=" " required value="${this.state.settings.namaToko}"><label class="form-label">Nama Toko</label></div><div class="form-group"><input type="text" id="s-alamatToko" class="form-input" placeholder=" " required value="${this.state.settings.alamatToko}"><label class="form-label">Alamat Toko</label></div><div class="form-group"><input type="tel" id="s-teleponToko" class="form-input" placeholder=" " required value="${this.state.settings.teleponToko}"><label class="form-label">No. Telepon</label></div><div class="form-group"><textarea id="s-pesanDiStruk" class="form-input" placeholder=" " required>${this.state.settings.pesanDiStruk}</textarea><label class="form-label">Pesan di Struk</label></div><div class="form-group"><input type="number" id="s-lowStock" class="form-input" placeholder=" " required value="${this.state.settings.lowStockThreshold}"><label class="form-label">Ambang Batas Stok Rendah</label></div><button type="button" class="btn btn-primary" data-action="saveSettings">Simpan Pengaturan</button></form></div></div>`;},
         saveSettings() { const newSettings = { namaToko: document.getElementById('s-namaToko').value, alamatToko: document.getElementById('s-alamatToko').value, teleponToko: document.getElementById('s-teleponToko').value, pesanDiStruk: document.getElementById('s-pesanDiStruk').value, lowStockThreshold: parseInt(document.getElementById('s-lowStock').value) }; this.state.settings = { ...this.state.settings, ...newSettings }; this.saveToLocalStorage('settings', this.state.settings); this.applySettings(); this.showToast('Pengaturan berhasil disimpan.', 'success'); },
-        renderLainnya() { /* Fungsi lengkap untuk render menu lainnya */ },
+                // --- [DILENGKAPI] HALAMAN LAINNYA ---
+        renderLainnya() { 
+            const adminMenus = [
+                { id: 'produk', icon: 'fa-solid fa-box-open', label: 'Produk'},
+                { id: 'analitik', icon: 'fa-solid fa-chart-line', label: 'Analitik'},
+                { id: 'pelanggan', icon: 'fa-solid fa-users', label: 'Pelanggan'},
+                { id: 'biaya', icon: 'fa-solid fa-wallet', label: 'Biaya'},
+                { id: 'pengguna', icon: 'fa-solid fa-user-shield', label: 'Pengguna'},
+                { id: 'pengaturan', icon: 'fa-solid fa-gear', label: 'Pengaturan'}
+            ];
+            const menuItemsHTML = (this.state.currentUser.role === 'admin' ? adminMenus : [])
+                .map(item => `<li class="lainnya-menu-item"><a href="#" class="nav-link" data-page="${item.id}"><i class="${item.icon}"></i>${item.label}</a></li>`).join('');
+
+            return `<div class="page-container"><header class="header"><h1>Lainnya</h1></header><ul class="lainnya-menu">${menuItemsHTML}<li class="lainnya-menu-item"><a href="#" data-action="logout"><i class="fa-solid fa-right-from-bracket"></i>Keluar</a></li></ul></div>`; 
+        },
+
 
         // --- UTILITAS LAINNYA ---
         initCarousel() { const carousel = document.getElementById('dashboard-carousel'); if (!carousel) return; const track = carousel.querySelector('.carousel-track'); const slides = Array.from(track.children); const dots = Array.from(carousel.querySelectorAll('.carousel-dot')); if (slides.length <= 1) return; let currentIndex = 0; const goToSlide = (index) => { track.style.transform = `translateX(-${index * 100}%)`; dots.forEach(dot => dot.classList.remove('active')); dots[index]?.classList.add('active'); currentIndex = index; }; dots.forEach(dot => { dot.addEventListener('click', e => { const targetIndex = parseInt(e.target.dataset.slideTo); goToSlide(targetIndex); clearInterval(this.carouselInterval); this.carouselInterval = setInterval(autoSlide, 5000); }); }); const autoSlide = () => { goToSlide((currentIndex + 1) % slides.length); }; this.carouselInterval = setInterval(autoSlide, 5000); },
