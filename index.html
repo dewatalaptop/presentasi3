@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
 
-                injectBaseHTML() {
+        injectBaseHTML() {
             const menuItems = [
                 { id: 'beranda', icon: 'fa-solid fa-store', label: 'Beranda', role: 'all' },
                 { id: 'kasir', icon: 'fa-solid fa-cash-register', label: 'Kasir', role: 'all' },
@@ -388,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { id: 'pengaturan', icon: 'fa-solid fa-gear', label: 'Pengaturan', role: 'admin' },
                 { id: 'lainnya', icon: 'fa-solid fa-ellipsis', label: 'Lainnya', role: 'all', mobileOnly: true },
             ];
-            // PERBAIKAN: Menggunakan optional chaining untuk keamanan
+            // === PERBAIKAN DIIMPLEMENTASIKAN DI SINI ===
             const userRole = this.state.currentUser?.role;
             const visibleMenuItems = menuItems.filter(item => item.role === 'all' || item.role === userRole);
             document.querySelector('.sidebar-menu').innerHTML = visibleMenuItems.filter(item => !item.mobileOnly).map(item => `<li><a href="#" class="nav-link" data-page="${item.id}"><i class="${item.icon}"></i><span>${item.label}</span></a></li>`).join('');
@@ -649,7 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         // === 5. FUNGSI RENDER HALAMAN UTAMA ===
-                renderBeranda() {
+        renderBeranda() {
             const today = new Date().toISOString().slice(0, 10);
             const todayTrx = this.state.transactions.filter(t => t.date.startsWith(today));
             const revenueToday = todayTrx.reduce((sum, t) => sum + t.finalTotal, 0);
@@ -659,7 +659,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const netProfitToday = revenueToday - cogsToday - expensesToday;
             const lowStockProducts = this.state.products.filter(p => p.stock > 0 && p.stock <= this.state.settings.lowStockThreshold);
             
-            // PERBAIKAN: Menggunakan optional chaining (?.) untuk mencegah error jika currentUser belum siap.
             const userName = this.state.currentUser?.name?.split(' ')[0] || 'Pengguna';
 
             const banners = this.state.settings.dashboardBanners || [];
