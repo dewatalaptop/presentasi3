@@ -262,8 +262,6 @@
     <div id="toast-container"></div>
 
     <script>
-// --- APLIKASI POS PROFESIONAL V5.0 (REFACTORED & IMPROVED) ---
-// Bagian 2 akan dimulai di sini...
 document.addEventListener('DOMContentLoaded', () => {
     const App = {
         // === 1. STATE & INISIALISASI ===
@@ -281,7 +279,6 @@ document.addEventListener('DOMContentLoaded', () => {
             settings: {}, 
             shifts: [], 
             activeShift: null,
-            // PENAMBAHAN: State untuk paginasi
             pagination: {
                 products: { currentPage: 1, filter: '' },
                 transactions: { currentPage: 1, filter: '' },
@@ -336,14 +333,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 dashboardBanners: []
             };
             try {
-                // PERUBAHAN: Semua nilai uang (price, cost) diubah menjadi integer
                 this.state.products = this.getFromLocalStorage('products', [ 
                     { id: 1, name: 'Kopi Susu Gula Aren', category: 'Kopi', price: 18000, cost: 10000, stock: 50, imageUrl: null }, 
                     { id: 2, name: 'Croissant Coklat', category: 'Roti', price: 22000, cost: 12000, stock: 8, imageUrl: null },
                     { id: 3, name: 'Americano', category: 'Kopi', price: 15000, cost: 7000, stock: 0, imageUrl: null }, 
                 ]);
                 
-                // Migrasi data lama jika ada (jika harga masih desimal)
                 if (this.state.products.length > 0 && !Number.isInteger(this.state.products[0].price)) {
                     this.state.products.forEach(p => {
                         p.price = Math.round(p.price);
@@ -414,16 +409,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         attachEventListeners() {
             document.body.addEventListener('click', e => {
-                // PERBAIKAN: Logika untuk modal paksa sekarang ditangani di show/closeModal
-                // jadi tidak perlu pencegahan klik di sini lagi.
-                
                 const navLink = e.target.closest('.nav-link, .nav-link-dynamic');
                 if (navLink) { e.preventDefault(); this.showPage(navLink.dataset.page); return; }
                 
                 const actionEl = e.target.closest('[data-action]');
                 if (actionEl) { e.preventDefault(); this.handleAction(actionEl.dataset.action, actionEl.dataset.id || actionEl.dataset.value, actionEl); return; }
                 
-                // PENAMBAHAN: Event listener untuk tombol paginasi
                 const pageBtn = e.target.closest('.page-btn');
                 if (pageBtn && !pageBtn.disabled) { this.handlePageChange(pageBtn); return; }
 
@@ -455,44 +446,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         },
-
-        scheduleRender(renderFnName) { /* ... (Tidak ada perubahan) ... */ },
-        attachPageSpecificEventListeners(pageId) { /* ... (Tidak ada perubahan, logika dipindah ke fungsi render) ... */ },
-        handleAction(action, id, element) { /* ... (Akan diisi di bagian selanjutnya) ... */ },
         
-        // === 2. AUTHENTICATION & SHIFT MANAGEMENT (dengan Integer) ===
-        renderLoginScreen() { /* ... (Tidak ada perubahan) ... */ },
-        handleLogin() { /* ... (Tidak ada perubahan) ... */ },
+        // === 2. AUTHENTICATION & SHIFT MANAGEMENT ===
+        renderLoginScreen() { this.elements.appContainer.style.display = 'none'; const loginScreen = this.elements.loginScreen; loginScreen.style.display = 'flex'; loginScreen.innerHTML = `<div class="login-box"><i class="fa-solid fa-bolt" style="font-size: 40px; color: var(--primary-500); margin-bottom: 20px;"></i><h1>Selamat Datang</h1><p>Masukkan username dan PIN Anda untuk masuk.</p><form id="login-form"><div class="form-group"><input type="text" id="username" class="form-input" placeholder=" " required><label for="username" class="form-label">Username</label></div><div class="form-group"><input type="password" id="pin" class="form-input" placeholder=" " required inputmode="numeric" pattern="\\d*"><label for="pin" class="form-label">PIN</label></div><button type="submit" class="btn btn-primary" style="width: 100%;">Masuk</button></form></div>`; },
+        handleLogin() { const username = document.getElementById('username').value; const pin = document.getElementById('pin').value; const user = this.state.staff.find(u => u.username === username && u.pin === pin); if (user) { this.state.currentUser = user; this.saveToLocalStorage('currentUser', user); this.showToast(`Selamat datang, ${user.name}!`, 'success'); this.startApp(); } else { this.showToast('Username atau PIN salah.', 'error'); } },
         logout() { if (this.state.activeShift) { this.showToast('Anda harus menutup shift terlebih dahulu.', 'error'); this.showEndShiftModal(); return; } this.state.currentUser = null; localStorage.removeItem('currentUser'); this.state.currentPage = 'beranda'; this.saveToLocalStorage('currentPage', 'beranda'); window.location.reload(); },
         showStartShiftModal() { const content = `<p>Masukkan modal awal Anda.</p><div class="form-group" style="margin-top: 20px;"><input type="number" id="opening-cash" class="form-input" placeholder=" " required min="0" inputmode="numeric"><label class="form-label">Modal Awal</label></div>`; this.showModal('Buka Kasir', content, () => { const openingCash = this.parseRupiahToInt(document.getElementById('opening-cash').value); if (isNaN(openingCash) || openingCash < 0) { this.showToast('Masukkan jumlah modal yang valid.', 'error'); return false; } this.startShift(openingCash); }, 'Mulai Shift', true, true); },
         startShift(openingCash) { const newShift = { id: 'SHIFT-' + Date.now(), userId: this.state.currentUser.id, userName: this.state.currentUser.name, startTime: new Date().toISOString(), endTime: null, openingCash: openingCash, closingCash: null, cashSales: 0, calculatedCash: 0, difference: 0 }; this.state.activeShift = newShift; this.saveToLocalStorage('activeShift', this.state.activeShift); this.showToast('Shift berhasil dimulai!', 'success'); this.showPage(this.state.currentPage); },
         showEndShiftModal() { const shiftTransactions = this.state.transactions.filter(t => this.state.activeShift && t.shiftId === this.state.activeShift.id); const cashSales = shiftTransactions.filter(t => t.paymentMethod === 'Tunai').reduce((sum, t) => sum + t.finalTotal, 0); const expectedCash = this.state.activeShift.openingCash + cashSales; const content = `<div style="font-size: 14px; color: var(--neutral-600);"><div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Modal Awal:</span> <strong>${this.formatIntToRupiah(this.state.activeShift.openingCash)}</strong></div><div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>Total Penjualan Tunai:</span> <strong>${this.formatIntToRupiah(cashSales)}</strong></div><hr style="margin: 10px 0;"><div style="display:flex; justify-content:space-between; margin-bottom:15px;"><span>Uang di Laci Seharusnya:</span> <strong style="color:var(--primary-500);">${this.formatIntToRupiah(expectedCash)}</strong></div></div><p>Masukkan jumlah uang tunai aktual di laci.</p><div class="form-group" style="margin-top:20px;"><input type="number" id="closing-cash" class="form-input" placeholder=" " required min="0" inputmode="numeric"><label class="form-label">Uang Tunai Aktual</label></div>`; this.showModal('Tutup Kasir', content, () => { const closingCash = this.parseRupiahToInt(document.getElementById('closing-cash').value); if (isNaN(closingCash) || closingCash < 0) { this.showToast('Masukkan jumlah yang valid.', 'error'); return false; } this.endShift(closingCash, cashSales, expectedCash); }, 'Selesaikan Shift', true, true); },
         endShift(closingCash, cashSales, expectedCash) { let shift = { ...this.state.activeShift }; shift.endTime = new Date().toISOString(); shift.closingCash = closingCash; shift.cashSales = cashSales; shift.calculatedCash = expectedCash; shift.difference = closingCash - expectedCash; this.state.shifts.unshift(shift); this.state.activeShift = null; this.saveToLocalStorage('shifts', this.state.shifts); this.saveToLocalStorage('activeShift', null); let message = 'Shift berhasil ditutup.'; if (shift.difference !== 0) { message += ` Ada selisih ${this.formatIntToRupiah(shift.difference)}.`; } this.showToast(message, shift.difference === 0 ? 'success' : 'warning'); this.showPage('beranda'); },
 
-        // === 3. UTILITIES & MODALS (Banyak Perubahan) ===
+        // === 3. UTILITIES & MODALS ===
         getFromLocalStorage(key, defaultValue) { const data = localStorage.getItem(key); if (!data) return defaultValue; try { return JSON.parse(data); } catch { return defaultValue; } },
         saveToLocalStorage: (key, data) => { try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) { console.error("Gagal menyimpan ke LocalStorage:", e); App.showToast('Error: Penyimpanan lokal penuh atau rusak.', 'error'); } },
-        
-        // PERUBAHAN: Fungsi utilitas mata uang berbasis integer
         formatIntToRupiah: (number) => { const num = number || 0; return `Rp ${new Intl.NumberFormat('id-ID').format(num)}`; },
         parseRupiahToInt: (stringValue) => { if (typeof stringValue !== 'string' && typeof stringValue !== 'number') return NaN; const cleanString = String(stringValue).replace(/[Rp.\s]/g, ''); return parseInt(cleanString, 10); },
-        
-        // PENAMBAHAN: Fungsi utilitas loader
         showLoader() { if (this.elements.loader) this.elements.loader.style.display = 'flex'; },
         hideLoader() { if (this.elements.loader) this.elements.loader.style.display = 'none'; },
-        
-        // PENAMBAHAN: Fungsi utilitas pencarian fuzzy
         fuzzySearch(haystack, needles) {
             const hs = haystack.toLowerCase();
             const ndls = needles.toLowerCase().split(' ').filter(n => n);
             return ndls.every(needle => hs.includes(needle));
         },
-        
         formatDate: (isoString, withTime = false) => { const options = { day: '2-digit', month: 'short', year: 'numeric' }; if (withTime) { options.hour = '2-digit'; options.minute = '2-digit'; } return new Date(isoString).toLocaleDateString('id-ID', options); },
         applySettings() { document.title = `${this.state.settings.namaToko} - POS`; if(this.elements.sidebarStoreName) this.elements.sidebarStoreName.textContent = this.state.settings.namaToko; },
         showToast(message, type = 'success') { const toast = document.createElement('div'); toast.className = `toast ${type}`; toast.textContent = message; this.elements.toastContainer.appendChild(toast); setTimeout(() => { toast.remove(); }, 3000); },
-        
-        // PERBAIKAN: showModal sekarang mendukung 'isForced'
         showModal(title, contentHTML, onConfirm, confirmText = 'Simpan', onConfirmShouldClose = true, isForced = false) {
             const modalContent = document.createElement('div');
             modalContent.className = 'modal-content';
@@ -505,7 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.body.classList.add('forced-modal-open');
                 modalContent.querySelector('.modal-header .close-modal')?.remove();
                 modalContent.querySelector('.btn-secondary.close-modal')?.remove();
-                modalContent.querySelector('form').dataset.modalType = 'shift-modal'; // Penanda internal
+                modalContent.querySelector('form').dataset.modalType = 'shift-modal';
             }
 
             modalContent.querySelectorAll('.form-group').forEach(group => { const input = group.querySelector('.form-input'); if (input && input.value.trim() !== '') { group.classList.add('has-value'); } });
@@ -518,10 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             this.elements.modalContainer.querySelectorAll('.close-modal').forEach(el => el.addEventListener('click', () => this.closeModal()));
         },
-        
         showConfirmModal(title, message, onConfirm) { this.showModal(title, `<p>${message}</p>`, () => { onConfirm(); return true; }, "Ya, Lanjutkan", true); },
-        
-        // PERBAIKAN: closeModal sekarang membersihkan class 'forced-modal-open'
         closeModal() {
             if (document.querySelector('#modal-form[data-modal-type="shift-modal"]')) {
                 this.showToast('Harap selesaikan aksi shift untuk melanjutkan.', 'warning');
@@ -531,10 +506,6 @@ document.addEventListener('DOMContentLoaded', () => {
             this.elements.modalContainer.innerHTML = '';
             document.body.classList.remove('forced-modal-open');
         },
-    };
-
-// Bagian 3 akan dimulai di sini...
-// ... (Lanjutan dari Bagian 2)
 
         // === 4. NAVIGASI, AKSI & RENDER HALAMAN ===
         handleAction(action, id, element) {
@@ -558,7 +529,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'editExpense': this.showExpenseModal(value); break;
                 case 'deleteExpense': this.deleteExpense(value); break;
                 case 'updateCartQty': this.updateCartQuantity(value, parseInt(element.dataset.change)); break;
-                // PERBAIKAN: Memanggil konfirmasi sebelum menghapus
                 case 'removeFromCart': this.showConfirmModal('Hapus Item?', `Anda yakin ingin menghapus item ini dari keranjang?`, () => this.updateCartQuantity(value, -Infinity)); break;
                 case 'showCustomerSelection': this.showCustomerSelectionModal(); break;
                 case 'openPaymentModal': this.openPaymentModal(); break;
@@ -570,7 +540,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     element.disabled = true;
                     element.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
                     this.showToast('Menyiapkan nota...', 'warning');
-                    setTimeout(() => { // Beri waktu UI untuk update
+                    setTimeout(() => {
                         const receiptEl = document.getElementById('receipt-print-area');
                         const filename = document.getElementById('receipt-filename').value || 'struk.png';
                         html2canvas(receiptEl, { scale: 3 }).then(canvas => {
@@ -605,13 +575,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
 
-        // PENAMBAHAN: Fungsi untuk menangani klik paginasi
         handlePageChange(button) {
             const pageName = button.dataset.pageName;
             const change = parseInt(button.dataset.change, 10);
             if (this.state.pagination[pageName]) {
                 this.state.pagination[pageName].currentPage += change;
-                this.showPage(pageName, false); // false berarti tidak mereset filter
+                this.showPage(pageName, false);
             }
         },
         
@@ -629,7 +598,6 @@ document.addEventListener('DOMContentLoaded', () => {
             this.state.currentPage = pageId; 
             this.saveToLocalStorage('currentPage', pageId); 
             
-            // PERBAIKAN: Mereset paginasi dan filter saat berganti halaman
             if (resetFilter && this.state.pagination[pageId]) {
                 this.state.pagination[pageId].currentPage = 1;
                 this.state.pagination[pageId].filter = '';
@@ -651,13 +619,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (renderer) { 
                 this.elements.pageContent.innerHTML = renderer(); 
-                // Event listener khusus sekarang dipasang langsung di dalam fungsi render
             } else { 
                 this.elements.pageContent.innerHTML = `<div class="page-container"><div class="card">Halaman "${pageId}" tidak ditemukan.</div></div>`; 
             } 
         },
 
-        // PENAMBAHAN: Fungsi utilitas untuk membuat kontrol paginasi
         renderPaginator(pageName, totalItems) {
             const { currentPage } = this.state.pagination[pageName];
             const totalPages = Math.ceil(totalItems / this.state.itemsPerPage);
@@ -680,7 +646,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>`;
         },
 
-        // === 5. FUNGSI RENDER HALAMAN UTAMA (Diperbarui dengan Integer & Paginasi) ===
+        // === 5. FUNGSI RENDER HALAMAN UTAMA ===
         renderBeranda() {
             const today = new Date().toISOString().slice(0, 10);
             const todayTrx = this.state.transactions.filter(t => t.date.startsWith(today));
@@ -692,9 +658,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const lowStockProducts = this.state.products.filter(p => p.stock > 0 && p.stock <= this.state.settings.lowStockThreshold);
             
             const banners = this.state.settings.dashboardBanners || [];
-            let heroHTML = banners.length > 0 ? `<div id="dashboard-carousel" class="carousel-container">...</div>` : `...`; // konten hero sama
-            
-            // ... (sisa logika Beranda, menggunakan formatIntToRupiah)
+            let heroHTML = banners.length > 0 
+                ? `<div id="dashboard-carousel" class="carousel-container">
+                       <div class="carousel-track">${banners.map(src => `<div class="carousel-slide"><img src="${src}" alt="Banner Promosi"></div>`).join('')}</div>
+                       <div class="carousel-dots">${banners.map((_, i) => `<div class="carousel-dot ${i === 0 ? 'active' : ''}" data-slide-to="${i}"></div>`).join('')}</div>
+                   </div>` 
+                : `<div class="card" style="background-color: var(--primary-500); color: white;">
+                       <h2>Selamat Datang, ${this.state.currentUser.name.split(' ')[0]}!</h2>
+                       <p>Siap memulai hari yang produktif.</p>
+                   </div>`;
+
             let shiftInfoHTML = '';
             if (this.state.currentUser.role === 'kasir') {
                 if (this.state.activeShift) {
@@ -705,9 +678,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            const berandaHTML = `<div class="page-container"><header class="header"><h1>Beranda</h1></header>${heroHTML}${shiftInfoHTML}<div class="dashboard-section-title">Ringkasan Hari Ini</div><div class="stats-grid"><div class="stat-card"><h4>Pendapatan</h4><p class="stat-card-value">${this.formatIntToRupiah(revenueToday)}</p></div><div class="stat-card"><h4>Laba Bersih</h4><p class="stat-card-value">${this.formatIntToRupiah(netProfitToday)}</p></div><div class="stat-card"><h4>Transaksi</h4><p class="stat-card-value">${todayTrx.length}</p></div></div><div class="dashboard-section-title">Aksi Cepat</div><div class="card">...</div><div class="dashboard-section-title">Stok Menipis</div><div class="card" style="padding: 15px;">${lowStockProducts.length > 0 ? lowStockProducts.map(p => `<div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid var(--neutral-100);"><span>${p.name}</span><span class="stock-badge low">Sisa ${p.stock}</span></div>`).join('') : '<p style="color:var(--neutral-400); text-align:center; padding: 10px;">Semua stok aman.</p>'}</div></div>`;
+            const berandaHTML = `<div class="page-container"><header class="header"><h1>Beranda</h1></header>${heroHTML}${shiftInfoHTML}<div class="dashboard-section-title">Ringkasan Hari Ini</div><div class="stats-grid"><div class="stat-card"><h4>Pendapatan</h4><p class="stat-card-value">${this.formatIntToRupiah(revenueToday)}</p></div><div class="stat-card"><h4>Laba Bersih</h4><p class="stat-card-value">${this.formatIntToRupiah(netProfitToday)}</p></div><div class="stat-card"><h4>Transaksi</h4><p class="stat-card-value">${todayTrx.length}</p></div></div><div class="dashboard-section-title">Aksi Cepat</div><div class="card"><div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 15px; text-align: center;"><a href="#" class="nav-link-dynamic" data-page="kasir" style="color: var(--neutral-800); text-decoration:none;"><span style="width:60px; height:60px; background-color: var(--neutral-100); border-radius: 12px; display: inline-flex; justify-content: center; align-items: center; font-size: 24px;"><i class="fa-solid fa-cash-register"></i></span><span style="display:block; margin-top:8px; font-weight:500;">Mulai Transaksi</span></a><a href="#" data-action="addProduct" style="color: var(--neutral-800); text-decoration:none; ${this.state.currentUser.role !== 'admin' ? 'display:none;' : ''}"><span style="width:60px; height:60px; background-color: var(--neutral-100); border-radius: 12px; display: inline-flex; justify-content: center; align-items: center; font-size: 24px;"><i class="fa-solid fa-plus"></i></span><span style="display:block; margin-top:8px; font-weight:500;">Tambah Produk</span></a><a href="#" class="nav-link-dynamic" data-page="analitik" style="color: var(--neutral-800); text-decoration:none; ${this.state.currentUser.role !== 'admin' ? 'display:none;' : ''}"><span style="width:60px; height:60px; background-color: var(--neutral-100); border-radius: 12px; display: inline-flex; justify-content: center; align-items: center; font-size: 24px;"><i class="fa-solid fa-chart-line"></i></span><span style="display:block; margin-top:8px; font-weight:500;">Lihat Analitik</span></a><a href="#" class="nav-link-dynamic" data-page="riwayat" style="color: var(--neutral-800); text-decoration:none;"><span style="width:60px; height:60px; background-color: var(--neutral-100); border-radius: 12px; display: inline-flex; justify-content: center; align-items: center; font-size: 24px;"><i class="fa-solid fa-receipt"></i></span><span style="display:block; margin-top:8px; font-weight:500;">Riwayat</span></a></div></div><div class="dashboard-section-title">Stok Menipis</div><div class="card" style="padding: 15px;">${lowStockProducts.length > 0 ? lowStockProducts.map(p => `<div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid var(--neutral-100);"><span>${p.name}</span><span class="stock-badge low">Sisa ${p.stock}</span></div>`).join('') : '<p style="color:var(--neutral-400); text-align:center; padding: 10px;">Semua stok aman.</p>'}</div></div>`;
 
-            // Setelah HTML di-render, pasang event listener khusus
             setTimeout(() => this.initCarousel(), 0);
             return berandaHTML;
         },
@@ -732,7 +704,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderProductGrid(searchTerm = '') {
             const grid = document.getElementById('product-grid');
             if (!grid) return;
-            // PERBAIKAN: Menggunakan fuzzySearch
             const filteredProducts = searchTerm ? this.state.products.filter(p => this.fuzzySearch(p.name, searchTerm)) : this.state.products;
             grid.innerHTML = filteredProducts.length ? filteredProducts.map(p => {
                 const imageHTML = p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}">` : `<div class="product-card-placeholder">${p.name.charAt(0)}</div>`;
@@ -769,12 +740,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!container) return;
             
             const pageState = this.state.pagination.transactions;
-            // PERBAIKAN: Menggunakan fuzzySearch
             const filtered = this.state.transactions.filter(t => 
                 this.fuzzySearch(t.id, pageState.filter) || this.fuzzySearch(t.customerName, pageState.filter)
             );
 
-            // PENAMBAHAN: Logika Paginasi
             const startIndex = (pageState.currentPage - 1) * this.state.itemsPerPage;
             const endIndex = startIndex + this.state.itemsPerPage;
             const paginatedItems = filtered.slice(startIndex, endIndex);
@@ -787,17 +756,22 @@ document.addEventListener('DOMContentLoaded', () => {
             } else { tableHTML += `<tr><td colspan="6" style="text-align:center;">Transaksi tidak ditemukan.</td></tr>`; }
             tableHTML += `</tbody></table>`;
             
-            // Tambahkan kontrol paginasi
             container.innerHTML = tableHTML + this.renderPaginator('transactions', filtered.length);
         },
 
-        renderLainnya() { /* ... (Tidak ada perubahan signifikan) ... */ },
-        renderPengaturan() { /* ... (Tidak ada perubahan signifikan) ... */ }
+        renderLainnya() {
+            const adminMenus = [ { id: 'produk', icon: 'fa-solid fa-box-open', label: 'Produk'}, { id: 'analitik', icon: 'fa-solid fa-chart-line', label: 'Analitik'}, { id: 'pelanggan', icon: 'fa-solid fa-users', label: 'Pelanggan'}, { id: 'biaya', icon: 'fa-solid fa-wallet', label: 'Biaya'}, { id: 'pengguna', icon: 'fa-solid fa-user-shield', label: 'Pengguna'}, { id: 'pengaturan', icon: 'fa-solid fa-gear', label: 'Pengaturan'} ];
+            const menuItemsHTML = (this.state.currentUser.role === 'admin' ? adminMenus : []).map(item => `<li class="lainnya-menu-item"><a href="#" class="nav-link" data-page="${item.id}"><i class="${item.icon}"></i>${item.label}</a></li>`).join('');
+            return `<div class="page-container"><header class="header"><h1>Lainnya</h1></header><ul class="lainnya-menu">${menuItemsHTML}<li class="lainnya-menu-item"><a href="#" data-action="logout"><i class="fa-solid fa-right-from-bracket"></i>Keluar</a></li></ul></div>`; 
+        },
 
-// Bagian 4 akan dimulai di sini...
-// ... (Lanjutan dari Bagian 3)
+        renderPengaturan() {
+            const banners = this.state.settings.dashboardBanners || [];
+            const bannerPreviewHTML = banners.map((src, index) => `<div class="banner-preview-item"><img src="${src}" alt="Banner ${index + 1}"><button class="banner-remove-btn" data-action="removeBanner" data-id="${index}">&times;</button></div>`).join('');
+            return `<div class="page-container"><header class="header"><h1>Pengaturan</h1></header><div class="card"><h2>Pengaturan Toko</h2><form id="settings-form" novalidate><div class="form-group"><input type="text" id="s-namaToko" class="form-input" placeholder=" " required value="${this.state.settings.namaToko}"><label class="form-label">Nama Toko</label></div><div class="form-group"><input type="text" id="s-alamatToko" class="form-input" placeholder=" " required value="${this.state.settings.alamatToko}"><label class="form-label">Alamat Toko</label></div><div class="form-group"><input type="tel" id="s-teleponToko" class="form-input" placeholder=" " required value="${this.state.settings.teleponToko}"><label class="form-label">No. Telepon</label></div><div class="form-group"><textarea id="s-pesanDiStruk" class="form-input" placeholder=" " required>${this.state.settings.pesanDiStruk}</textarea><label class="form-label">Pesan di Struk</label></div><div class="form-group"><input type="number" id="s-lowStock" class="form-input" placeholder=" " required value="${this.state.settings.lowStockThreshold}"><label class="form-label">Ambang Batas Stok Rendah</label></div><button type="button" class="btn btn-primary" data-action="saveSettings">Simpan Pengaturan</button></form></div><div class="card"><h2>Manajemen Banner Beranda</h2><p style="color: var(--neutral-600); margin-bottom: 20px;">Unggah hingga 5 gambar untuk ditampilkan di beranda.</p><div id="banner-preview-grid" class="banner-preview-grid">${bannerPreviewHTML}</div>${banners.length < 5 ? `<div style="margin-top: 20px;"><label for="banner-uploader" class="btn btn-secondary"><i class="fa-solid fa-upload"></i> Unggah Gambar</label><input type="file" id="banner-uploader" data-uploader="dashboardBanners" accept="image/*" multiple></div>` : `<p style="color: var(--warning-700); margin-top: 20px; font-weight: 500;">Slot banner sudah penuh (Maksimal 5).</p>`}</div></div>`;
+        },
 
-        // === 6. LOGIKA KERANJANG & PEMBAYARAN (Dirombak total dengan Integer) ===
+        // === 6. LOGIKA KERANJANG & PEMBAYARAN ===
         getCurrentCartItems() { return this.state.cart; },
         saveCurrentCart(items) { this.state.cart = items; this.saveToLocalStorage('cart', this.state.cart); },
         
@@ -838,11 +812,11 @@ document.addEventListener('DOMContentLoaded', () => {
             let items = this.getCurrentCartItems();
             let priceUpdated = false;
 
-            // PERBAIKAN: Sinkronisasi harga item di keranjang dengan data produk master
             items.forEach(item => {
                 const productMaster = this.state.products.find(p => p.id === item.id);
                 if (productMaster && item.price !== productMaster.price) {
-                    item.price = productMaster.price; // Update harga
+                    item.price = productMaster.price;
+                    item.priceJustUpdated = true;
                     priceUpdated = true;
                 }
             });
@@ -853,9 +827,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const { subtotal, finalTotal } = this.calculateCartTotals(items);
             cartItemsContainer.innerHTML = items.length > 0 ? items.map(item => {
-                // Tambahkan class flash jika harga baru saja diupdate
-                const productMaster = this.state.products.find(p => p.id === item.id);
-                const flashClass = (productMaster && item.price !== productMaster.price) ? 'price-updated-flash' : '';
+                const flashClass = item.priceJustUpdated ? 'price-updated-flash' : '';
+                if(item.priceJustUpdated) delete item.priceJustUpdated;
                 
                 return `<div id="cart-item-${item.id}" class="${flashClass}" style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid var(--neutral-100);"><div><strong style="display:block; margin-bottom: 4px; font-size: 14px;">${item.name}</strong><div class="cart-item-controls"><button data-action="updateCartQty" data-id="${item.id}" data-change="-1">-</button><span class="cart-item-qty">${item.quantity}</span><button data-action="updateCartQty" data-id="${item.id}" data-change="1">+</button><button data-action="removeFromCart" data-id="${item.id}" style="margin-left:10px; color: var(--danger-500); background: transparent;"><i class="fa-solid fa-trash"></i></button></div></div><div style="text-align:right;"><strong class="cart-item-total" style="font-weight: 500;">${this.formatIntToRupiah(item.price * item.quantity)}</strong></div></div>`;
             }).join('') : `<p class="empty-cart-msg" style="color: var(--neutral-400); text-align:center; padding: 20px 0;">Keranjang kosong</p>`;
@@ -876,7 +849,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         calculateCartTotals(items) { 
             const finalTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            return { subtotal: finalTotal, totalDiscount: 0, finalTotal }; // Disederhanakan karena diskon belum ada
+            return { subtotal: finalTotal, totalDiscount: 0, finalTotal };
         },
 
         openPaymentModal() { 
@@ -932,11 +905,20 @@ document.addEventListener('DOMContentLoaded', () => {
             return true;
         },
 
-        showReceiptOptionsModal(transactionId) { /* ... (Tidak ada perubahan signifikan, hanya memanggil formatIntToRupiah) ... */ },
-        showTransactionDetailModal(transactionId) { /* ... (Tidak ada perubahan signifikan, hanya memanggil formatIntToRupiah) ... */ },
-        generateReceiptHTML(trx) { const { settings } = this.state; return `<div id="receipt-print-area" style="font-family: 'Courier New', monospace; color: #000; padding: 20px;"><div style="text-align:center;"><h3 style="margin:0; font-size: 18px;">${settings.namaToko}</h3><p style="margin:0; font-size: 12px;">${settings.alamatToko}</p><p style="margin:0; font-size: 12px;">Tel: ${settings.teleponToko}</p></div><hr style="border: 1px dashed #000; margin: 10px 0;"><table style="font-size: 12px; width: 100%;">...</table><hr style="border: 1px dashed #000; margin: 10px 0;"><table style="font-size: 12px; width: 100%; border-collapse: collapse;">${trx.items.map(item => `<tr><td colspan="3">${item.name}</td></tr><tr><td style="padding-left: 10px;">${item.quantity} x ${this.formatIntToRupiah(item.price)}</td><td></td><td style="text-align:right;">${this.formatIntToRupiah(item.quantity * item.price)}</td></tr>`).join('')}</table><hr style="border: 1px dashed #000; margin: 10px 0;"><table style="font-size: 12px; width: 100%;"><tr><td>Subtotal</td><td style="text-align:right;">${this.formatIntToRupiah(trx.subtotal)}</td></tr><tr><td style="font-weight:bold;">Total</td><td style="text-align:right; font-weight:bold;">${this.formatIntToRupiah(trx.finalTotal)}</td></tr>...${trx.paymentMethod === 'Tunai' ? `<tr><td>Bayar (Tunai)</td><td style="text-align:right;">${this.formatIntToRupiah(trx.paidAmount)}</td></tr><tr><td>Kembali</td><td style="text-align:right;">${this.formatIntToRupiah(trx.changeAmount)}</td></tr>` : ''}</table>...</div>`;},
+        showReceiptOptionsModal(transactionId) {
+            const trx = this.state.transactions.find(t => t.id === transactionId);
+            if (!trx) return;
+            const receiptHTML = this.generateReceiptHTML(trx);
+            const defaultFilename = `Struk-${this.state.settings.namaToko.replace(/\s+/g, '-')}-${trx.id}.png`;
+            const content = `<div style="text-align: center; margin-bottom: 20px;"><i class="fa-solid fa-circle-check" style="color: var(--success-500); font-size: 48px;"></i><h3 style="margin-top: 15px;">Transaksi Berhasil!</h3></div><div style="border: 1px solid var(--neutral-200); border-radius: 8px; max-height: 300px; overflow-y: auto;">${receiptHTML}</div><div id="receipt-actions" style="margin-top: 25px;"><div class="form-group"><input type="text" id="receipt-filename" class="form-input" value="${defaultFilename}" placeholder=" "><label for="receipt-filename" class="form-label">Nama File Nota</label></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;"><button class="btn btn-secondary" data-action="saveReceipt"><i class="fa-solid fa-floppy-disk"></i> Simpan Nota</button><button class="btn btn-secondary" data-action="printThermalReceipt"><i class="fa-solid fa-print"></i> Cetak Struk</button></div><button class="btn btn-primary" data-action="finishTransaction" style="width: 100%;">Selesai (Transaksi Baru)</button></div>`;
+            this.showModal('Opsi Struk', content, null);
+            const modalFooter = document.querySelector('#modal-container .modal-content div[style*="text-align:right"]');
+            if(modalFooter) modalFooter.remove();
+        },
+        showTransactionDetailModal(transactionId) { const trx = this.state.transactions.find(t => t.id === transactionId); if (!trx) return; const receiptHTML = this.generateReceiptHTML(trx); const content = `<div style="border: 1px solid var(--neutral-200); border-radius: 8px; max-height: 400px; overflow-y: auto;">${receiptHTML}</div>`; this.showModal(`Detail Transaksi: ${trx.id}`, content, null, '', false); const modalFooter = document.querySelector('.modal-content div[style*="text-align:right"]'); if (modalFooter) { modalFooter.innerHTML = `<button class="btn btn-secondary" data-action="printReceipt"><i class="fa-solid fa-print"></i> Cetak Ulang Struk</button>`; } },
+        generateReceiptHTML(trx) { const { settings } = this.state; return `<div id="receipt-print-area" style="font-family: 'Courier New', monospace; color: #000; padding: 20px;"><div style="text-align:center;"><h3 style="margin:0; font-size: 18px;">${settings.namaToko}</h3><p style="margin:0; font-size: 12px;">${settings.alamatToko}</p><p style="margin:0; font-size: 12px;">Tel: ${settings.teleponToko}</p></div><hr style="border: 1px dashed #000; margin: 10px 0;"><table style="font-size: 12px; width: 100%;"><tr><td>No Trans:</td><td style="text-align:right;">${trx.id}</td></tr><tr><td>Kasir:</td><td style="text-align:right;">${trx.userName}</td></tr><tr><td>Tanggal:</td><td style="text-align:right;">${this.formatDate(trx.date, true)}</td></tr><tr><td>Pelanggan:</td><td style="text-align:right;">${trx.customerName}</td></tr></table><hr style="border: 1px dashed #000; margin: 10px 0;"><table style="font-size: 12px; width: 100%; border-collapse: collapse;">${trx.items.map(item => `<tr><td colspan="3">${item.name}</td></tr><tr><td style="padding-left: 10px;">${item.quantity} x ${this.formatIntToRupiah(item.price)}</td><td></td><td style="text-align:right;">${this.formatIntToRupiah(item.quantity * item.price)}</td></tr>`).join('')}</table><hr style="border: 1px dashed #000; margin: 10px 0;"><table style="font-size: 12px; width: 100%;"><tr><td>Subtotal</td><td style="text-align:right;">${this.formatIntToRupiah(trx.subtotal)}</td></tr>${trx.totalDiscount > 0 ? `<tr><td>Diskon</td><td style="text-align:right;">-${this.formatIntToRupiah(trx.totalDiscount)}</td></tr>` : ''}<tr><td style="font-weight:bold;">Total</td><td style="text-align:right; font-weight:bold;">${this.formatIntToRupiah(trx.finalTotal)}</td></tr><tr><td>Metode Bayar</td><td style="text-align:right;">${trx.paymentMethod}</td></tr>${trx.paymentMethod === 'Tunai' ? `<tr><td>Bayar (Tunai)</td><td style="text-align:right;">${this.formatIntToRupiah(trx.paidAmount)}</td></tr><tr><td>Kembali</td><td style="text-align:right;">${this.formatIntToRupiah(trx.changeAmount)}</td></tr>` : ''}</table><hr style="border: 1px dashed #000; margin: 10px 0;"><div style="text-align:center; font-size: 12px;"><p>${settings.pesanDiStruk}</p></div></div>`;},
         
-        // === 7. FUNGSI-FUNGSI ADMIN (Diperbarui dengan Paginasi, Integer, Pencarian Fuzzy) ===
+        // === 7. FUNGSI-FUNGSI ADMIN ===
         renderProduk() {
             const pageState = this.state.pagination.products;
             const produkHTML = `<div class="page-container">
@@ -1033,9 +1015,6 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteProduct(productId) { this.showConfirmModal('Hapus Produk?', 'Anda yakin ingin menghapus produk ini?', () => { this.state.products = this.state.products.filter(p => p.id != productId); this.saveToLocalStorage('products', this.state.products); this.showPage('produk'); this.showToast('Produk berhasil dihapus.'); }); },
         addStockLog(productId, change, from, to, reason) { this.state.stockHistory.unshift({ id: 'STK-' + Date.now(), productId, date: new Date().toISOString(), change, from, to, reason, userId: this.state.currentUser.id, userName: this.state.currentUser.name }); },
         
-// Bagian 5 akan dimulai di sini...
-// ... (Lanjutan dari Bagian 4)
-
         renderPelanggan() {
             const pageState = this.state.pagination.customers;
             const pelangganHTML = `<div class="page-container">
@@ -1077,16 +1056,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showCustomerModal(customerId) { const isEdit = customerId !== undefined; const customer = isEdit ? this.state.customers.find(c => c.id == customerId) : {}; const content = `<div class="form-group"><input type="text" id="c-name" class="form-input" placeholder=" " required value="${customer.name || ''}"><label class="form-label">Nama</label></div><div class="form-group"><input type="tel" id="c-phone" class="form-input" placeholder=" " value="${customer.phone || ''}"><label class="form-label">No. HP (Opsional)</label></div>`; this.showModal(isEdit ? 'Edit Pelanggan' : 'Tambah Pelanggan', content, () => this.saveCustomer(customerId)); },
         saveCustomer(customerId) { const name = document.getElementById('c-name').value.trim(); const phone = document.getElementById('c-phone').value.trim(); if (!name) return false; if (customerId) { const index = this.state.customers.findIndex(c => c.id == customerId); this.state.customers[index] = { ...this.state.customers[index], name, phone }; } else { this.state.customers.push({ id: Date.now(), name, phone, totalSpent: 0, visitCount: 0 }); } this.saveToLocalStorage('customers', this.state.customers); this.showPage('pelanggan'); this.showToast(`Pelanggan berhasil ${customerId ? 'diperbarui' : 'ditambahkan'}.`); return true; },
         deleteCustomer(customerId) { this.showConfirmModal('Hapus Pelanggan?', 'Anda yakin ingin menghapus pelanggan ini?', () => { this.state.customers = this.state.customers.filter(c => c.id != customerId); this.saveToLocalStorage('customers', this.state.customers); this.showPage('pelanggan'); this.showToast('Pelanggan berhasil dihapus.'); }); },
-        renderBiaya() { /* ... (Logika sama, hanya diperbarui untuk menggunakan paginasi & integer) ... */ },
-        renderExpenseTable() { /* ... (Logika sama, hanya diperbarui untuk menggunakan paginasi & integer) ... */ },
-        showExpenseModal(expenseId) { /* ... (Logika sama, hanya diperbarui untuk menggunakan integer) ... */ },
-        saveExpense(expenseId) { /* ... (Logika sama, hanya diperbarui untuk menggunakan integer) ... */ },
-        deleteExpense(expenseId) { /* ... (Logika sama) ... */ },
-        renderPengguna() { /* ... (Logika sama, hanya diperbarui untuk menggunakan paginasi & pencarian) ... */ },
-        renderUserTable() { /* ... (Logika sama, hanya diperbarui untuk menggunakan paginasi & pencarian) ... */ },
-        showUserModal(userId) { /* ... (Logika sama) ... */ },
-        saveUser(userId) { /* ... (Logika sama) ... */ },
-        deleteUser(userId) { /* ... (Logika sama) ... */ },
         
         renderAnalitik() {
             const today = new Date();
@@ -1120,10 +1089,18 @@ document.addEventListener('DOMContentLoaded', () => {
             this.charts.salesChart = new Chart(ctx, { type: 'line', data: { labels: sortedDates, datasets: [{ label: 'Pendapatan', data: sortedDates.map(date => salesByDate[date]), borderColor: 'var(--primary-500)', backgroundColor: 'rgba(59, 130, 246, 0.1)', fill: true, tension: 0.3 }] }, options: { maintainAspectRatio: false, scales: { x: { type: 'time', time: { unit: 'day', tooltipFormat: 'dd MMM yyyy' } }, y: { ticks: { callback: (value) => this.formatIntToRupiah(value) } } } } });
         },
 
-        // === 8. UTILITAS LAINNYA (dengan kompresi gambar) ===
-        initCarousel() { /* ... (Tidak ada perubahan) ... */ },
+        // === 8. UTILITAS LAINNYA ===
+        initCarousel() {
+            const carousel = document.getElementById('dashboard-carousel'); if (!carousel) return;
+            const track = carousel.querySelector('.carousel-track'); const slides = Array.from(track.children); const dots = Array.from(carousel.querySelectorAll('.carousel-dot'));
+            if (slides.length <= 1) return;
+            let currentIndex = 0;
+            const goToSlide = (index) => { if(!track || !dots[index]) return; track.style.transform = `translateX(-${index * 100}%)`; dots.forEach(dot => dot.classList.remove('active')); dots[index].classList.add('active'); currentIndex = index; };
+            dots.forEach(dot => { dot.addEventListener('click', e => { const targetIndex = parseInt(e.target.dataset.slideTo); goToSlide(targetIndex); clearInterval(this.carouselInterval); this.carouselInterval = setInterval(autoSlide, 3000); }); });
+            const autoSlide = () => { const nextIndex = (currentIndex + 1) % slides.length; goToSlide(nextIndex); };
+            this.carouselInterval = setInterval(autoSlide, 3000);
+        },
         
-        // PERBAIKAN: handleUploader sekarang melakukan kompresi gambar
         async handleUploader(type, files) {
             if (!files || files.length === 0) return;
             this.showLoader();
@@ -1134,8 +1111,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const filesToProcess = Array.from(files).slice(0, slotsAvailable);
 
                 const compressionOptions = {
-                    maxSizeMB: 0.5, // Maksimal 500KB
-                    maxWidthOrHeight: 1280, // Resolusi maksimal
+                    maxSizeMB: 0.5,
+                    maxWidthOrHeight: 1280,
                     useWebWorker: true,
                 };
 
@@ -1174,9 +1151,9 @@ document.addEventListener('DOMContentLoaded', () => {
         },
     };
     
-    // Inisialisasi Aplikasi
     App.init();
 });
+
 </script>
 </body>
 </html>
