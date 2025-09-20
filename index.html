@@ -375,6 +375,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
 
+        // ++++++++++++++++++++ MULAI KODE PENGGANTI ++++++++++++++++++++
+
         injectBaseHTML() {
             const menuItems = [
                 { id: 'beranda', icon: 'fa-solid fa-store', label: 'Beranda', role: 'all' },
@@ -388,13 +390,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 { id: 'pengaturan', icon: 'fa-solid fa-gear', label: 'Pengaturan', role: 'admin' },
                 { id: 'lainnya', icon: 'fa-solid fa-ellipsis', label: 'Lainnya', role: 'all', mobileOnly: true },
             ];
-            // === PERBAIKAN DIIMPLEMENTASIKAN DI SINI ===
+            
+            // Filter menu berdasarkan peran pengguna yang sedang login
             const userRole = this.state.currentUser?.role;
             const visibleMenuItems = menuItems.filter(item => item.role === 'all' || item.role === userRole);
-            document.querySelector('.sidebar-menu').innerHTML = visibleMenuItems.filter(item => !item.mobileOnly).map(item => `<li><a href="#" class="nav-link" data-page="${item.id}"><i class="${item.icon}"></i><span>${item.label}</span></a></li>`).join('');
+            
+            // Render menu untuk Sidebar (tampilan desktop/tablet)
+            document.querySelector('.sidebar-menu').innerHTML = visibleMenuItems
+                .filter(item => !item.mobileOnly)
+                .map(item => `<li><a href="#" class="nav-link" data-page="${item.id}"><i class="${item.icon}"></i><span>${item.label}</span></a></li>`)
+                .join('');
+            
+            // Render menu untuk Bottom Nav (tampilan mobile)
             const mobileMenuIds = ['beranda', 'kasir', 'riwayat', 'lainnya'];
-            document.querySelector('.bottom-nav').innerHTML = menuItems.filter(item => mobileMenuIds.includes(item.id)).map(item => `<a href="#" class="bottom-nav-link nav-link" data-page="${item.id}"><i class="${item.icon}"></i><span>${item.label}</span></a>`).join('');
+            // BAGIAN YANG DIPERBAIKI ADA DI BARIS BERIKUTNYA:
+            document.querySelector('.bottom-nav').innerHTML = visibleMenuItems 
+                .filter(item => mobileMenuIds.includes(item.id))
+                .map(item => `<a href="#" class="bottom-nav-link nav-link" data-page="${item.id}"><i class="${item.icon}"></i><span>${item.label}</span></a>`)
+                .join('');
         },
+
+// ++++++++++++++++++++ AKHIR KODE PENGGANTI ++++++++++++++++++++
+
 
 
         cacheDOMElements() {
