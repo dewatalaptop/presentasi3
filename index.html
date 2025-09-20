@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
 
-        injectBaseHTML() {
+                injectBaseHTML() {
             const menuItems = [
                 { id: 'beranda', icon: 'fa-solid fa-store', label: 'Beranda', role: 'all' },
                 { id: 'kasir', icon: 'fa-solid fa-cash-register', label: 'Kasir', role: 'all' },
@@ -388,12 +388,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 { id: 'pengaturan', icon: 'fa-solid fa-gear', label: 'Pengaturan', role: 'admin' },
                 { id: 'lainnya', icon: 'fa-solid fa-ellipsis', label: 'Lainnya', role: 'all', mobileOnly: true },
             ];
-            const userRole = this.state.currentUser.role;
+            // PERBAIKAN: Menggunakan optional chaining untuk keamanan
+            const userRole = this.state.currentUser?.role;
             const visibleMenuItems = menuItems.filter(item => item.role === 'all' || item.role === userRole);
             document.querySelector('.sidebar-menu').innerHTML = visibleMenuItems.filter(item => !item.mobileOnly).map(item => `<li><a href="#" class="nav-link" data-page="${item.id}"><i class="${item.icon}"></i><span>${item.label}</span></a></li>`).join('');
             const mobileMenuIds = ['beranda', 'kasir', 'riwayat', 'lainnya'];
             document.querySelector('.bottom-nav').innerHTML = menuItems.filter(item => mobileMenuIds.includes(item.id)).map(item => `<a href="#" class="bottom-nav-link nav-link" data-page="${item.id}"><i class="${item.icon}"></i><span>${item.label}</span></a>`).join('');
         },
+
 
         cacheDOMElements() {
             this.elements = {
@@ -647,7 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
 
         // === 5. FUNGSI RENDER HALAMAN UTAMA ===
-        renderBeranda() {
+                renderBeranda() {
             const today = new Date().toISOString().slice(0, 10);
             const todayTrx = this.state.transactions.filter(t => t.date.startsWith(today));
             const revenueToday = todayTrx.reduce((sum, t) => sum + t.finalTotal, 0);
@@ -657,6 +659,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const netProfitToday = revenueToday - cogsToday - expensesToday;
             const lowStockProducts = this.state.products.filter(p => p.stock > 0 && p.stock <= this.state.settings.lowStockThreshold);
             
+            // PERBAIKAN: Menggunakan optional chaining (?.) untuk mencegah error jika currentUser belum siap.
+            const userName = this.state.currentUser?.name?.split(' ')[0] || 'Pengguna';
+
             const banners = this.state.settings.dashboardBanners || [];
             let heroHTML = banners.length > 0 
                 ? `<div id="dashboard-carousel" class="carousel-container">
@@ -664,12 +669,12 @@ document.addEventListener('DOMContentLoaded', () => {
                        <div class="carousel-dots">${banners.map((_, i) => `<div class="carousel-dot ${i === 0 ? 'active' : ''}" data-slide-to="${i}"></div>`).join('')}</div>
                    </div>` 
                 : `<div class="card" style="background-color: var(--primary-500); color: white;">
-                       <h2>Selamat Datang, ${this.state.currentUser.name.split(' ')[0]}!</h2>
+                       <h2>Selamat Datang, ${userName}!</h2>
                        <p>Siap memulai hari yang produktif.</p>
                    </div>`;
 
             let shiftInfoHTML = '';
-            if (this.state.currentUser.role === 'kasir') {
+            if (this.state.currentUser?.role === 'kasir') {
                 if (this.state.activeShift) {
                     const shiftDuration = Math.floor((new Date() - new Date(this.state.activeShift.startTime)) / 60000);
                     shiftInfoHTML = `<div class="card" style="background-color: var(--success-100);"><div style="display:flex; justify-content:space-between; align-items:center;"><div><h4 style="color: var(--success-700);">Shift Berjalan</h4><p style="font-size:14px; color: var(--success-700);">Dimulai ${shiftDuration} menit lalu.</p></div><button class="btn btn-danger" data-action="showEndShiftModal">Tutup Kasir</button></div></div>`;
@@ -678,11 +683,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             
-            const berandaHTML = `<div class="page-container"><header class="header"><h1>Beranda</h1></header>${heroHTML}${shiftInfoHTML}<div class="dashboard-section-title">Ringkasan Hari Ini</div><div class="stats-grid"><div class="stat-card"><h4>Pendapatan</h4><p class="stat-card-value">${this.formatIntToRupiah(revenueToday)}</p></div><div class="stat-card"><h4>Laba Bersih</h4><p class="stat-card-value">${this.formatIntToRupiah(netProfitToday)}</p></div><div class="stat-card"><h4>Transaksi</h4><p class="stat-card-value">${todayTrx.length}</p></div></div><div class="dashboard-section-title">Aksi Cepat</div><div class="card"><div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 15px; text-align: center;"><a href="#" class="nav-link-dynamic" data-page="kasir" style="color: var(--neutral-800); text-decoration:none;"><span style="width:60px; height:60px; background-color: var(--neutral-100); border-radius: 12px; display: inline-flex; justify-content: center; align-items: center; font-size: 24px;"><i class="fa-solid fa-cash-register"></i></span><span style="display:block; margin-top:8px; font-weight:500;">Mulai Transaksi</span></a><a href="#" data-action="addProduct" style="color: var(--neutral-800); text-decoration:none; ${this.state.currentUser.role !== 'admin' ? 'display:none;' : ''}"><span style="width:60px; height:60px; background-color: var(--neutral-100); border-radius: 12px; display: inline-flex; justify-content: center; align-items: center; font-size: 24px;"><i class="fa-solid fa-plus"></i></span><span style="display:block; margin-top:8px; font-weight:500;">Tambah Produk</span></a><a href="#" class="nav-link-dynamic" data-page="analitik" style="color: var(--neutral-800); text-decoration:none; ${this.state.currentUser.role !== 'admin' ? 'display:none;' : ''}"><span style="width:60px; height:60px; background-color: var(--neutral-100); border-radius: 12px; display: inline-flex; justify-content: center; align-items: center; font-size: 24px;"><i class="fa-solid fa-chart-line"></i></span><span style="display:block; margin-top:8px; font-weight:500;">Lihat Analitik</span></a><a href="#" class="nav-link-dynamic" data-page="riwayat" style="color: var(--neutral-800); text-decoration:none;"><span style="width:60px; height:60px; background-color: var(--neutral-100); border-radius: 12px; display: inline-flex; justify-content: center; align-items: center; font-size: 24px;"><i class="fa-solid fa-receipt"></i></span><span style="display:block; margin-top:8px; font-weight:500;">Riwayat</span></a></div></div><div class="dashboard-section-title">Stok Menipis</div><div class="card" style="padding: 15px;">${lowStockProducts.length > 0 ? lowStockProducts.map(p => `<div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid var(--neutral-100);"><span>${p.name}</span><span class="stock-badge low">Sisa ${p.stock}</span></div>`).join('') : '<p style="color:var(--neutral-400); text-align:center; padding: 10px;">Semua stok aman.</p>'}</div></div>`;
+            const berandaHTML = `<div class="page-container"><header class="header"><h1>Beranda</h1></header>${heroHTML}${shiftInfoHTML}<div class="dashboard-section-title">Ringkasan Hari Ini</div><div class="stats-grid"><div class="stat-card"><h4>Pendapatan</h4><p class="stat-card-value">${this.formatIntToRupiah(revenueToday)}</p></div><div class="stat-card"><h4>Laba Bersih</h4><p class="stat-card-value">${this.formatIntToRupiah(netProfitToday)}</p></div><div class="stat-card"><h4>Transaksi</h4><p class="stat-card-value">${todayTrx.length}</p></div></div><div class="dashboard-section-title">Aksi Cepat</div><div class="card"><div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 15px; text-align: center;"><a href="#" class="nav-link-dynamic" data-page="kasir" style="color: var(--neutral-800); text-decoration:none;"><span style="width:60px; height:60px; background-color: var(--neutral-100); border-radius: 12px; display: inline-flex; justify-content: center; align-items: center; font-size: 24px;"><i class="fa-solid fa-cash-register"></i></span><span style="display:block; margin-top:8px; font-weight:500;">Mulai Transaksi</span></a><a href="#" data-action="addProduct" style="color: var(--neutral-800); text-decoration:none; ${this.state.currentUser?.role !== 'admin' ? 'display:none;' : ''}"><span style="width:60px; height:60px; background-color: var(--neutral-100); border-radius: 12px; display: inline-flex; justify-content: center; align-items: center; font-size: 24px;"><i class="fa-solid fa-plus"></i></span><span style="display:block; margin-top:8px; font-weight:500;">Tambah Produk</span></a><a href="#" class="nav-link-dynamic" data-page="analitik" style="color: var(--neutral-800); text-decoration:none; ${this.state.currentUser?.role !== 'admin' ? 'display:none;' : ''}"><span style="width:60px; height:60px; background-color: var(--neutral-100); border-radius: 12px; display: inline-flex; justify-content: center; align-items: center; font-size: 24px;"><i class="fa-solid fa-chart-line"></i></span><span style="display:block; margin-top:8px; font-weight:500;">Lihat Analitik</span></a><a href="#" class="nav-link-dynamic" data-page="riwayat" style="color: var(--neutral-800); text-decoration:none;"><span style="width:60px; height:60px; background-color: var(--neutral-100); border-radius: 12px; display: inline-flex; justify-content: center; align-items: center; font-size: 24px;"><i class="fa-solid fa-receipt"></i></span><span style="display:block; margin-top:8px; font-weight:500;">Riwayat</span></a></div></div><div class="dashboard-section-title">Stok Menipis</div><div class="card" style="padding: 15px;">${lowStockProducts.length > 0 ? lowStockProducts.map(p => `<div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid var(--neutral-100);"><span>${p.name}</span><span class="stock-badge low">Sisa ${p.stock}</span></div>`).join('') : '<p style="color:var(--neutral-400); text-align:center; padding: 10px;">Semua stok aman.</p>'}</div></div>`;
 
             setTimeout(() => this.initCarousel(), 0);
             return berandaHTML;
         },
+
 
         renderKasir() {
             const kasirHTML = `<div class="kasir-container page-container"><div class="card product-section" style="padding: 15px; display:flex; flex-direction:column; margin-bottom:0;"><div style="margin-bottom:15px;"><input type="text" id="kasir-search-input" class="form-input" placeholder="Cari produk (F1)..."></div><div id="product-grid" class="product-grid" style="flex-grow:1;"></div></div><div id="cart-container" class="card cart-container" style="margin-bottom:0;"><button class="mobile-cart-close-btn" data-action="hideMobileCart">&times;</button><h3 style="margin-bottom:15px;">Keranjang</h3><div id="cart-items" style="flex-grow:1; overflow-y:auto; padding-right:10px;"></div><div id="cart-total" style="margin-top:auto; padding-top:15px; border-top:1px solid var(--neutral-200);"></div><div id="cart-actions" style="display:flex; flex-direction:column; gap:10px; margin-top:15px;"><button class="btn btn-primary" style="flex:1;" data-action="openPaymentModal" disabled>Bayar (F9)</button></div></div></div><div id="cart-summary-bar" data-action="showMobileCart"></div>`;
