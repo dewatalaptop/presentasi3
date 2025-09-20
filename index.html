@@ -377,16 +377,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ++++++++++++++++++++ MULAI KODE PENGGANTI ++++++++++++++++++++
 
-                injectBaseHTML() {
+        injectBaseHTML() {
             // Log untuk memulai proses debug
             console.log('Memulai proses injectBaseHTML...');
 
-            // PENGECEKAN PENTING: Pastikan currentUser ada dan memiliki peran (role)
-            if (!this.state.currentUser || !this.state.currentUser.role) {
-                console.error('KESALAHAN FATAL: injectBaseHTML dipanggil tetapi this.state.currentUser tidak valid.');
+            // PENGECEKAN PENTING: Validasi bahwa currentUser ada.
+            // Jika tidak ada, hentikan fungsi untuk mencegah error.
+            if (!this.state.currentUser) {
+                console.error('KESALAHAN: injectBaseHTML dipanggil tetapi this.state.currentUser tidak ada. Proses login mungkin gagal.');
                 // Kosongkan menu sebagai tindakan pengamanan
-                document.querySelector('.sidebar-menu').innerHTML = '';
-                document.querySelector('.bottom-nav').innerHTML = '';
+                const sidebarMenuEl = document.querySelector('.sidebar-menu');
+                const bottomNavEl = document.querySelector('.bottom-nav');
+                if (sidebarMenuEl) sidebarMenuEl.innerHTML = '';
+                if (bottomNavEl) bottomNavEl.innerHTML = '';
                 return; // Hentikan eksekusi fungsi
             }
 
@@ -403,7 +406,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 { id: 'lainnya', icon: 'fa-solid fa-ellipsis', label: 'Lainnya', role: 'all', mobileOnly: true },
             ];
 
-            const userRole = this.state.currentUser.role;
+            // SOLUSI: Berikan peran default 'kasir' jika properti 'role' tidak ditemukan.
+            // Ini membuat validasi lebih toleran dan mencegah menu kosong.
+            const userRole = this.state.currentUser.role || 'kasir'; 
             console.log(`Peran pengguna yang terdeteksi: "${userRole}"`);
 
             // Filter menu berdasarkan peran yang sudah valid
@@ -422,12 +427,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Buat HTML untuk sidebar (desktop)
+            // Filter tambahan untuk item yang bukan 'mobileOnly'
             const sidebarHTML = visibleMenuItems
                 .filter(item => !item.mobileOnly)
                 .map(item => `<li><a href="#" class="nav-link" data-page="${item.id}"><i class="${item.icon}"></i><span>${item.label}</span></a></li>`)
                 .join('');
 
             // Buat HTML untuk navigasi bawah (mobile)
+            // Tampilkan hanya menu utama di mobile
             const mobileMenuIds = ['beranda', 'kasir', 'riwayat', 'lainnya'];
             const bottomNavHTML = visibleMenuItems
                 .filter(item => mobileMenuIds.includes(item.id))
@@ -437,6 +444,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // Terapkan HTML ke elemen DOM
             sidebarMenuEl.innerHTML = sidebarHTML;
             bottomNavEl.innerHTML = bottomNavHTML;
+            
+            // Panggil kembali fungsi untuk mengaktifkan link halaman saat ini setelah menu dirender
+            this.showPage(this.state.currentPage, false);
 
             console.log('Proses injectBaseHTML selesai. Menu seharusnya sudah tampil.');
         },
