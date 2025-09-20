@@ -377,7 +377,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ++++++++++++++++++++ MULAI KODE PENGGANTI ++++++++++++++++++++
 
-        injectBaseHTML() {
+                injectBaseHTML() {
+            // Log untuk memulai proses debug
+            console.log('Memulai proses injectBaseHTML...');
+
+            // PENGECEKAN PENTING: Pastikan currentUser ada dan memiliki peran (role)
+            if (!this.state.currentUser || !this.state.currentUser.role) {
+                console.error('KESALAHAN FATAL: injectBaseHTML dipanggil tetapi this.state.currentUser tidak valid.');
+                // Kosongkan menu sebagai tindakan pengamanan
+                document.querySelector('.sidebar-menu').innerHTML = '';
+                document.querySelector('.bottom-nav').innerHTML = '';
+                return; // Hentikan eksekusi fungsi
+            }
+
             const menuItems = [
                 { id: 'beranda', icon: 'fa-solid fa-store', label: 'Beranda', role: 'all' },
                 { id: 'kasir', icon: 'fa-solid fa-cash-register', label: 'Kasir', role: 'all' },
@@ -390,25 +402,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 { id: 'pengaturan', icon: 'fa-solid fa-gear', label: 'Pengaturan', role: 'admin' },
                 { id: 'lainnya', icon: 'fa-solid fa-ellipsis', label: 'Lainnya', role: 'all', mobileOnly: true },
             ];
-            
-            // Filter menu berdasarkan peran pengguna yang sedang login
-            const userRole = this.state.currentUser?.role;
+
+            const userRole = this.state.currentUser.role;
+            console.log(`Peran pengguna yang terdeteksi: "${userRole}"`);
+
+            // Filter menu berdasarkan peran yang sudah valid
             const visibleMenuItems = menuItems.filter(item => item.role === 'all' || item.role === userRole);
-            
-            // Render menu untuk Sidebar (tampilan desktop/tablet)
-            document.querySelector('.sidebar-menu').innerHTML = visibleMenuItems
+
+            console.log('Jumlah menu yang akan ditampilkan:', visibleMenuItems.length);
+
+            // Ambil elemen DOM
+            const sidebarMenuEl = document.querySelector('.sidebar-menu');
+            const bottomNavEl = document.querySelector('.bottom-nav');
+
+            // Pastikan elemen target ada di HTML
+            if (!sidebarMenuEl || !bottomNavEl) {
+                console.error('KESALAHAN: Elemen .sidebar-menu atau .bottom-nav tidak ditemukan di HTML.');
+                return;
+            }
+
+            // Buat HTML untuk sidebar (desktop)
+            const sidebarHTML = visibleMenuItems
                 .filter(item => !item.mobileOnly)
                 .map(item => `<li><a href="#" class="nav-link" data-page="${item.id}"><i class="${item.icon}"></i><span>${item.label}</span></a></li>`)
                 .join('');
-            
-            // Render menu untuk Bottom Nav (tampilan mobile)
+
+            // Buat HTML untuk navigasi bawah (mobile)
             const mobileMenuIds = ['beranda', 'kasir', 'riwayat', 'lainnya'];
-            // BAGIAN YANG DIPERBAIKI ADA DI BARIS BERIKUTNYA:
-            document.querySelector('.bottom-nav').innerHTML = visibleMenuItems 
+            const bottomNavHTML = visibleMenuItems
                 .filter(item => mobileMenuIds.includes(item.id))
                 .map(item => `<a href="#" class="bottom-nav-link nav-link" data-page="${item.id}"><i class="${item.icon}"></i><span>${item.label}</span></a>`)
                 .join('');
+
+            // Terapkan HTML ke elemen DOM
+            sidebarMenuEl.innerHTML = sidebarHTML;
+            bottomNavEl.innerHTML = bottomNavHTML;
+
+            console.log('Proses injectBaseHTML selesai. Menu seharusnya sudah tampil.');
         },
+
 
 // ++++++++++++++++++++ AKHIR KODE PENGGANTI ++++++++++++++++++++
 
