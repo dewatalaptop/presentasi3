@@ -644,8 +644,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
         
-        showPage(pageId, resetFilter = true) { 
-            if (!pageId) return;
+                showPage(pageId, resetFilter = true) { 
+            // FIX KRUSIAL: Tambahkan "Guard Clause" di paling atas.
+            // Ini memastikan fungsi tidak akan pernah crash meskipun dipanggil dalam kondisi yang tidak ideal.
+            if (!pageId || !this.state.currentUser) {
+                console.error('Panggilan showPage dibatalkan: pageId atau currentUser tidak ada.');
+                return; // Langsung hentikan fungsi jika pengguna belum siap.
+            }
             
             const adminPages = ['analitik', 'pelanggan', 'biaya', 'pengguna', 'pengaturan', 'produk']; 
             if (this.state.currentUser.role !== 'admin' && adminPages.includes(pageId)) { 
@@ -683,6 +688,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.elements.pageContent.innerHTML = `<div class="page-container"><div class="card">Halaman "${pageId}" tidak ditemukan.</div></div>`; 
             } 
         },
+
 
         renderPaginator(pageName, totalItems) {
             const { currentPage } = this.state.pagination[pageName];
